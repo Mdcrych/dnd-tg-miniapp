@@ -1,212 +1,428 @@
-// === Telegram Web App Init ===
+// ======= Telegram Web App Init =======
 const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-}
+if (tg) { tg.ready(); tg.expand(); }
 
-// === Constants ===
-const ABILITIES = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
-const ABILITY_NAMES = { STR: 'Сила', DEX: 'Ловкость', CON: 'Телосложение', INT: 'Интеллект', WIS: 'Мудрость', CHA: 'Харизма' };
-
-// D&D 5e: minimum ability requirements per class (primary stats)
-const CLASS_REQUIREMENTS = {
-  barbarian: { STR: 13 },
-  bard:      { CHA: 13 },
-  cleric:    { WIS: 13 },
-  druid:     { WIS: 13 },
-  fighter:   { STR: 13 },
-  monk:      { DEX: 13, WIS: 13 },
-  paladin:   { STR: 13, CHA: 13 },
-  ranger:    { DEX: 13, WIS: 13 },
-  rogue:     { DEX: 13 },
-  sorcerer:  { CHA: 13 },
-  warlock:   { CHA: 13 },
-  wizard:    { INT: 13 },
+// ======= DATA =======
+const ABILITIES = ['STR','DEX','INT','WIL','PER','TEC'];
+const AB_FULL = {
+  STR: 'Сила', DEX: 'Ловкость', INT: 'Интеллект',
+  WIL: 'Воля', PER: 'Восприятие', TEC: 'Техника'
+};
+const AB_DESC = {
+  STR: 'мощь, захват, ближний бой',
+  DEX: 'стрельба, реакция, скрытность',
+  INT: 'анализ, код, память, логика',
+  WIL: 'самоконтроль, давление, стресс',
+  PER: 'наблюдение, поиск, инициатива',
+  TEC: 'ремонт, дроны, импланты'
 };
 
-// Racial stat bonuses (+value to ability)
-const RACIAL_BONUSES = {
-  human:       { STR:1, DEX:1, CON:1, INT:1, WIS:1, CHA:1 },
-  elf:         { DEX:2, INT:1 },
-  dwarf:       { CON:2, WIS:1 },
-  halfling:    { DEX:2, CHA:1 },
-  dragonborn:  { STR:2, CHA:1 },
-  gnome:       { INT:2, DEX:1 },
-  'half-elf':  { CHA:2, DEX:1, WIS:1 },
-  tiefling:    { INT:1, CHA:2 },
+// value → modifier per rulebook
+const AB_MOD = { 1: -2, 2: -1, 3: 0, 4: 1, 5: 2 };
+
+const SKILLS = [
+  { name: 'Атлетика',          base: 'STR' },
+  { name: 'Ближний бой',       base: 'STR / DEX' },
+  { name: 'Стрельба',          base: 'DEX' },
+  { name: 'Скрытность',        base: 'DEX' },
+  { name: 'Акробатика',        base: 'DEX' },
+  { name: 'Взлом',             base: 'INT / TEC' },
+  { name: 'Анализ',            base: 'INT' },
+  { name: 'Электроника',       base: 'TEC' },
+  { name: 'Ремонт',            base: 'TEC' },
+  { name: 'Медицина',          base: 'INT / TEC' },
+  { name: 'Вождение',          base: 'DEX' },
+  { name: 'Пилотирование',     base: 'DEX / TEC' },
+  { name: 'Дроны',             base: 'TEC' },
+  { name: 'Внимательность',    base: 'PER' },
+  { name: 'Поиск',             base: 'PER' },
+  { name: 'Уличная смекалка',  base: 'PER / INT' },
+  { name: 'Убеждение',         base: 'WIL' },
+  { name: 'Запугивание',       base: 'WIL / STR' },
+  { name: 'Ложь',              base: 'INT / WIL' },
+  { name: 'Исполнение',        base: 'WIL / PER' },
+  { name: 'Переговоры',        base: 'WIL' },
+  { name: 'Репутация',         base: 'WIL / PER' },
+  { name: 'Выживание в городе',base: 'PER' },
+];
+
+const SKILL_LEVELS = [
+  { label: '—',        bonus: null },
+  { label: 'Необучен', bonus: 0 },
+  { label: 'Обучен',   bonus: 2 },
+  { label: 'Эксперт',  bonus: 4 },
+  { label: 'Мастер',   bonus: 6 },
+];
+
+const DC_LABELS = {
+  8:  'Очень легко',
+  10: 'Легко',
+  13: 'Стандартно',
+  16: 'Трудно',
+  19: 'Очень трудно',
+  22: 'Экстремально',
 };
 
-const VALID_RACES = Object.keys(RACIAL_BONUSES);
-const VALID_CLASSES = Object.keys(CLASS_REQUIREMENTS);
-const VALID_BACKGROUNDS = ['acolyte','criminal','folk-hero','noble','sage','soldier'];
+const KIT_LABELS = {
+  merc: 'Уличный наёмник', tech: 'Подпольный техник', netrunner: 'Сетевой беглец',
+  ripper: 'Рипердок', agitator: 'Агитатор сцены', fixer: 'Фиксер района',
+  agent: 'Корпоративный агент', courier: 'Курьер-призрак',
+  pilot: 'Пилот транспорта', dronebuilder: 'Сборщик дронов',
+};
 
-let currentStep = 1;
-let rollHistory = [];
+const ORIGIN_LABELS = {
+  corpo: 'Корпо-беглец', street: 'Уличный ребёнок', military: 'Военный подрядчик',
+  clinic: 'Клинический специалист', media: 'Медиа-активист',
+  netrunner: 'Сетевой бродяга', smuggler: 'Контрабандист', cult: 'Культ техно-плоти',
+};
 
-// === Step Navigation ===
+// ======= STATE =======
+let abilityValues = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
+let TOTAL_POINTS = 6;
+let currentPopupAb = null;
+
+// ======= STEP NAVIGATION =======
 function showStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(stepId(n));
+  const ids = ['step-basic','step-abilities','step-skills','step-dice','step-summary','step-saved'];
+  const el = document.getElementById(ids[n-1]);
   if (el) el.classList.add('active');
-  currentStep = n;
-}
-
-function stepId(n) {
-  return ['step-basic','step-abilities','step-dice','step-summary','step-saved'][n-1];
+  window.scrollTo(0,0);
 }
 
 function nextStep(n) {
-  if (!validateStep(n - 1)) return;
-  if (n === 4) buildSummary();
-  if (n === 5) loadSaved();
+  if (!validateStep(n-1)) return;
+  if (n === 5) buildSummary();
+  if (n === 6) loadSaved();
   showStep(n);
 }
-
 function prevStep(n) { showStep(n); }
 
-// === Step Validation ===
-function validateStep(step) {
-  if (step === 1) {
-    const name = document.getElementById('char-name').value.trim();
-    const race = document.getElementById('char-race').value;
-    const cls  = document.getElementById('char-class').value;
-    const bg   = document.getElementById('char-background').value;
-    if (!name) return err('Введите имя персонажа');
-    if (!race) return err('Выберите расу');
-    if (!cls)  return err('Выберите класс');
-    if (!bg)   return err('Выберите предысторию');
+function validateStep(s) {
+  if (s === 1) {
+    const name = v('char-name'), origin = v('char-origin'), k1 = v('char-kit1'), k2 = v('char-kit2');
+    if (!name)   return err('Введите имя персонажа');
+    if (!origin) return err('Выберите происхождение');
+    if (!k1)     return err('Выберите первый пакет подготовки');
+    if (!k2)     return err('Выберите второй пакет подготовки');
+    if (k1 === k2) return err('Пакеты подготовки должны быть разными');
   }
-  if (step === 2) {
-    const scores = getAbilityScores();
-    for (const ab of ABILITIES) {
-      const v = scores[ab];
-      if (isNaN(v) || v < 3 || v > 18) return err(`Характеристика ${ABILITY_NAMES[ab]} должна быть от 3 до 18`);
-    }
+  if (s === 2) {
+    const errs = validateAbilities();
+    if (errs.length) return err(errs[0]);
+  }
+  if (s === 3) {
+    const errs = validateSkills();
+    if (errs.length) return err(errs[0]);
   }
   return true;
 }
 
+function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
 function err(msg) {
   if (tg) tg.showAlert(msg);
   else alert(msg);
   return false;
 }
 
-// === Ability Scores UI ===
+// ======= ABILITY SCORES =======
 function initAbilityScores() {
-  const container = document.getElementById('ability-scores');
-  container.innerHTML = ABILITIES.map(ab => `
-    <div class="ability-block">
-      <div class="ability-name">${ABILITY_NAMES[ab]}</div>
-      <input class="ability-input" id="ab-${ab}" type="number" min="3" max="18" value="10"
-        oninput="updateMod('${ab}')" />
-      <div class="ability-mod" id="mod-${ab}">+0</div>
+  const c = document.getElementById('ability-scores');
+  c.innerHTML = ABILITIES.map(ab => `
+    <div class="ability-block" id="ab-block-${ab}" onclick="openPopup('${ab}')">
+      <div class="ability-tag">${ab}</div>
+      <div class="ability-name-full">${AB_FULL[ab]}</div>
+      <div class="ability-controls">
+        <button class="ab-btn" onclick="event.stopPropagation(); changeAb('${ab}',-1)">−</button>
+        <span class="ab-val" id="ab-val-${ab}">${abilityValues[ab]}</span>
+        <button class="ab-btn" onclick="event.stopPropagation(); changeAb('${ab}',+1)">+</button>
+      </div>
+      <div class="ab-mod" id="ab-mod-${ab}"></div>
+      <div class="dice-hint">нажми → бросок проверки</div>
+    </div>
+  `).join('');
+  ABILITIES.forEach(ab => refreshAb(ab));
+  refreshPoints();
+}
+
+function changeAb(ab, delta) {
+  const cur = abilityValues[ab];
+  const next = cur + delta;
+  if (next < 1 || next > 5) return;
+
+  const cost = delta > 0
+    ? pointCost(cur, next)
+    : -pointCost(next, cur);
+
+  const remaining = getRemainingPoints();
+  if (delta > 0 && cost > remaining) { err(`Недостаточно очков! Нужно ${cost}, осталось ${remaining}`); return; }
+
+  abilityValues[ab] = next;
+  refreshAb(ab);
+  refreshPoints();
+}
+
+function pointCost(from, to) {
+  // 3→4 = 1, 4→5 = 2
+  let cost = 0;
+  for (let i = from; i < to; i++) cost += (i >= 4 ? 2 : 1);
+  return cost;
+}
+
+function totalSpent() {
+  let spent = 0;
+  ABILITIES.forEach(ab => { spent += pointCost(3, abilityValues[ab]); });
+  return spent;
+}
+
+function getRemainingPoints() { return TOTAL_POINTS - totalSpent(); }
+
+function refreshAb(ab) {
+  const val = abilityValues[ab];
+  const mod = AB_MOD[val] ?? 0;
+  document.getElementById(`ab-val-${ab}`).textContent = val;
+  const modEl = document.getElementById(`ab-mod-${ab}`);
+  modEl.textContent = `мод: ${mod >= 0 ? '+' : ''}${mod}`;
+  modEl.style.color = mod > 0 ? '#00ffe0' : mod < 0 ? '#ff3c6e' : '#6688aa';
+}
+
+function refreshPoints() {
+  document.getElementById('points-left').textContent = getRemainingPoints();
+}
+
+function validateAbilities() {
+  const errs = [];
+  const fives = ABILITIES.filter(ab => abilityValues[ab] === 5);
+  if (fives.length > 2) errs.push(`Нельзя иметь более двух характеристик на 5 (сейчас: ${fives.join(', ')})`);
+  if (getRemainingPoints() < 0) errs.push('Потрачено слишком много очков');
+  return errs;
+}
+
+// ======= POPUP (Ability Check) =======
+function openPopup(ab) {
+  currentPopupAb = ab;
+  const val = abilityValues[ab];
+  const mod = AB_MOD[val] ?? 0;
+  document.getElementById('popup-title').textContent = `Проверка ${AB_FULL[ab]} (${ab})`;
+  document.getElementById('popup-formula').textContent =
+    `1d20 + ${mod >= 0 ? '+' : ''}${mod} (мод) + навык + ситуатив = 1d20 + мод`;
+  document.getElementById('popup-result').classList.add('hidden');
+  document.querySelector('input[name=adv][value=normal]').checked = true;
+  document.getElementById('ability-roll-popup').classList.remove('hidden');
+  document.querySelectorAll('.ability-block').forEach(b => b.classList.remove('active-popup'));
+  document.getElementById(`ab-block-${ab}`)?.classList.add('active-popup');
+}
+
+function closePopup() {
+  document.getElementById('ability-roll-popup').classList.add('hidden');
+  document.querySelectorAll('.ability-block').forEach(b => b.classList.remove('active-popup'));
+  currentPopupAb = null;
+}
+
+function executeRoll() {
+  const ab = currentPopupAb;
+  if (!ab) return;
+  const val = abilityValues[ab];
+  const mod = AB_MOD[val] ?? 0;
+  const skillBonus = parseInt(document.getElementById('popup-skill').value) || 0;
+  const dc = parseInt(document.getElementById('popup-dc').value) || 13;
+  const adv = document.querySelector('input[name=adv]:checked')?.value || 'normal';
+
+  let d1 = roll20(), d2 = roll20();
+  let chosen, rolls;
+
+  if (adv === 'advantage') {
+    chosen = Math.max(d1, d2);
+    rolls = `[${d1}, ${d2}] → ${chosen}`;
+  } else if (adv === 'disadvantage') {
+    chosen = Math.min(d1, d2);
+    rolls = `[${d1}, ${d2}] → ${chosen}`;
+  } else {
+    chosen = d1;
+    rolls = `${d1}`;
+  }
+
+  const total = chosen + mod + skillBonus;
+  const isCritSuccess = chosen === 20;
+  const isCritFail    = chosen === 1;
+  const diff = total - dc;
+
+  let verdict, cls;
+  if (isCritFail) {
+    verdict = '💀 Критический провал! Осложнение.'; cls = 'crit-fail';
+  } else if (isCritSuccess) {
+    verdict = '⚡ Критический успех!'; cls = 'crit-success';
+  } else if (diff >= 0) {
+    verdict = `✅ Успех! (+${diff} к DC ${dc})`; cls = 'success';
+  } else if (diff >= -2) {
+    verdict = `⚠️ Успех с ценой? (не хватило ${Math.abs(diff)})`; cls = 'close';
+  } else {
+    verdict = `❌ Провал (не хватило ${Math.abs(diff)})`; cls = 'fail';
+  }
+
+  const skillLvl = ['Необучен','Обучен','Эксперт','Мастер'][skillBonus/2] || 'Необучен';
+  const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+  const sklStr = skillBonus > 0 ? ` + ${skillBonus} (${skillLvl})` : '';
+
+  const resEl = document.getElementById('popup-result');
+  resEl.classList.remove('hidden');
+  resEl.innerHTML = `
+    <div class="res-dice">d20: ${rolls}</div>
+    <div class="res-total">${chosen} (d20) ${modStr} (${AB_FULL[ab]})${sklStr} = <strong>${total}</strong> vs DC ${dc}</div>
+    <div class="res-verdict ${cls}">${verdict}</div>
+  `;
+
+  if (tg?.HapticFeedback) {
+    if (isCritSuccess) tg.HapticFeedback.notificationOccurred('success');
+    else if (isCritFail) tg.HapticFeedback.notificationOccurred('error');
+    else tg.HapticFeedback.impactOccurred('medium');
+  }
+
+  // Add to global roll history
+  addHistory(`Проверка ${ab}: d20=${chosen} + ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess ? 'КРИТ!' : isCritFail ? 'ФЕЙЛ!' : diff >= 0 ? 'Успех' : 'Провал'}`);
+}
+
+function roll20() { return Math.ceil(Math.random() * 20); }
+
+// ======= SKILLS =======
+function initSkills() {
+  const c = document.getElementById('skills-container');
+  c.innerHTML = SKILLS.map((sk, i) => `
+    <div class="skill-row">
+      <div class="skill-label">
+        <div class="skill-name">${sk.name}</div>
+        <div class="skill-base">${sk.base}</div>
+      </div>
+      <select class="skill-select" id="sk-${i}" onchange="onSkillChange()">
+        <option value="">—</option>
+        <option value="0">Необучен</option>
+        <option value="2">Обучен</option>
+        <option value="4">Эксперт</option>
+        <option value="6">Мастер</option>
+      </select>
     </div>
   `).join('');
 }
 
-function updateMod(ab) {
-  const val = parseInt(document.getElementById(`ab-${ab}`).value) || 10;
-  const mod = Math.floor((val - 10) / 2);
-  const el = document.getElementById(`mod-${ab}`);
-  el.textContent = mod >= 0 ? `+${mod}` : `${mod}`;
-  el.style.color = mod > 0 ? '#2ecc71' : mod < 0 ? '#e74c3c' : '#aaa';
-}
-
-function getAbilityScores() {
-  const scores = {};
-  ABILITIES.forEach(ab => { scores[ab] = parseInt(document.getElementById(`ab-${ab}`)?.value) || 0; });
-  return scores;
-}
-
-function rollAllStats() {
-  ABILITIES.forEach(ab => {
-    const rolls = Array.from({length:4}, () => Math.ceil(Math.random()*6));
-    rolls.sort((a,b)=>a-b);
-    const total = rolls[1]+rolls[2]+rolls[3];
-    document.getElementById(`ab-${ab}`).value = total;
-    updateMod(ab);
+function getSkillLevels() {
+  return SKILLS.map((sk, i) => {
+    const val = document.getElementById(`sk-${i}`)?.value;
+    return { name: sk.name, base: sk.base, bonus: val === '' ? null : parseInt(val) };
   });
 }
 
-// === Dice Roller ===
+function onSkillChange() {} // hook for future logic
+
+function validateSkills() {
+  const levels = getSkillLevels();
+  const trained = levels.filter(s => s.bonus === 2).length;
+  const expert  = levels.filter(s => s.bonus === 4).length;
+  const master  = levels.filter(s => s.bonus === 6).length;
+  const errs = [];
+  if (trained > 5) errs.push(`Обученных навыков: ${trained} (максимум 5)`);
+  if (expert > 1)  errs.push(`Навыков Эксперт: ${expert} (максимум 1)`);
+  if (master > 0)  errs.push('Нельзя начинать с уровня Мастер');
+  return errs;
+}
+
+// ======= DICE ROLLER (standalone) =======
+let rollHistoryLog = [];
+
 function rollDice(sides) {
   const count = parseInt(document.getElementById('dice-count').value) || 1;
   const results = Array.from({length: count}, () => Math.ceil(Math.random() * sides));
   const total = results.reduce((a,b)=>a+b,0);
-
-  const resultEl = document.getElementById('roll-result');
-  resultEl.classList.remove('hidden');
-  resultEl.textContent = count > 1
+  const label = count > 1
     ? `${count}d${sides}: [${results.join(', ')}] = ${total}`
     : `d${sides}: ${total}`;
 
-  // Add to history
-  const entry = document.createElement('p');
-  entry.textContent = `${count}d${sides} → ${total}` + (count>1 ? ` (${results.join('+')})` : '');
-  const hist = document.getElementById('roll-history');
-  hist.prepend(entry);
-  if (hist.children.length > 20) hist.lastChild.remove();
+  const resultEl = document.getElementById('roll-result');
+  resultEl.classList.remove('hidden');
+  resultEl.textContent = label;
+  addHistory(label);
 
-  // Haptic feedback via Telegram
   if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
-// === Summary & Build Validation ===
-function buildSummary() {
-  const name = document.getElementById('char-name').value.trim();
-  const race = document.getElementById('char-race').value;
-  const cls  = document.getElementById('char-class').value;
-  const bg   = document.getElementById('char-background').value;
-  const scores = getAbilityScores();
-  const bonuses = RACIAL_BONUSES[race] || {};
-
-  // Apply racial bonuses for display
-  const finalScores = {};
-  ABILITIES.forEach(ab => {
-    finalScores[ab] = Math.min(20, scores[ab] + (bonuses[ab] || 0));
-  });
-
-  const raceLabel = document.querySelector(`#char-race option[value="${race}"]`)?.textContent || race;
-  const clsLabel  = document.querySelector(`#char-class option[value="${cls}"]`)?.textContent || cls;
-  const bgLabel   = document.querySelector(`#char-background option[value="${bg}"]`)?.textContent || bg;
-
-  document.getElementById('summary-content').innerHTML = `
-    <div class="summary-row"><span class="summary-label">Имя</span><span class="summary-value">${name}</span></div>
-    <div class="summary-row"><span class="summary-label">Раса</span><span class="summary-value">${raceLabel}</span></div>
-    <div class="summary-row"><span class="summary-label">Класс</span><span class="summary-value">${clsLabel}</span></div>
-    <div class="summary-row"><span class="summary-label">Предыстория</span><span class="summary-value">${bgLabel}</span></div>
-    ${ABILITIES.map(ab => {
-      const mod = Math.floor((finalScores[ab]-10)/2);
-      return `<div class="summary-row">
-        <span class="summary-label">${ABILITY_NAMES[ab]}</span>
-        <span class="summary-value">${finalScores[ab]} (${mod>=0?'+':''}${mod})</span>
-      </div>`;
-    }).join('')}
-  `;
-
-  validateBuild(cls, finalScores);
+function addHistory(text) {
+  const hist = document.getElementById('roll-history');
+  if (!hist) return;
+  const p = document.createElement('p');
+  p.textContent = text;
+  hist.prepend(p);
+  if (hist.children.length > 25) hist.lastChild.remove();
 }
 
-function validateBuild(cls, scores) {
+// ======= SUMMARY + DERIVED STATS =======
+function buildSummary() {
+  const name    = v('char-name');
+  const concept = v('char-concept');
+  const origin  = v('char-origin');
+  const k1      = v('char-kit1');
+  const k2      = v('char-kit2');
+
+  // Derived stats
+  const STR = abilityValues.STR, WIL = abilityValues.WIL,
+        INT = abilityValues.INT, DEX = abilityValues.DEX, PER = abilityValues.PER;
+  const modDEX = AB_MOD[DEX];
+  const HP       = 10 + STR + WIL;
+  const STRESS   = 10 + WIL + INT;
+  const DEF      = 10 + modDEX;  // +0 armor base
+  const HUMANITY = 10 + WIL;
+  const IMPL_LIM = WIL + 1;
+
+  const mods = {};
+  ABILITIES.forEach(ab => { mods[ab] = AB_MOD[abilityValues[ab]] ?? 0; });
+
+  document.getElementById('summary-content').innerHTML = `
+    <div class="s-section">Персонаж</div>
+    <div class="s-row"><span class="s-label">Имя</span><span class="s-value">${name}</span></div>
+    <div class="s-row"><span class="s-label">Концепт</span><span class="s-value">${concept || '—'}</span></div>
+    <div class="s-row"><span class="s-label">Происхождение</span><span class="s-value">${ORIGIN_LABELS[origin] || origin}</span></div>
+    <div class="s-row"><span class="s-label">Пакеты</span><span class="s-value">${KIT_LABELS[k1] || k1} + ${KIT_LABELS[k2] || k2}</span></div>
+    <div class="s-section">Характеристики</div>
+    ${ABILITIES.map(ab => {
+      const m = mods[ab];
+      return `<div class="s-row">
+        <span class="s-label">${AB_FULL[ab]} (${ab})</span>
+        <span class="s-value">${abilityValues[ab]} (${m>=0?'+':''}${m})</span>
+      </div>`;
+    }).join('')}
+    <div class="s-section">Навыки</div>
+    ${getSkillLevels().filter(s => s.bonus !== null).map(s => {
+      const lvl = ['Необучен','Обучен','Эксперт','Мастер'][s.bonus/2] || 'Необучен';
+      return `<div class="s-row"><span class="s-label">${s.name}</span><span class="s-value">${lvl} (+${s.bonus})</span></div>`;
+    }).join('') || '<div class="s-row"><span class="s-label">—</span></div>'}
+  `;
+
+  document.getElementById('derived-stats').innerHTML = `
+    <div class="derived-item"><div class="derived-label">HP</div><div class="derived-val">${HP}</div></div>
+    <div class="derived-item"><div class="derived-label">STRESS</div><div class="derived-val">${STRESS}</div></div>
+    <div class="derived-item"><div class="derived-label">DEF (base)</div><div class="derived-val">${DEF}</div></div>
+    <div class="derived-item"><div class="derived-label">HUMANITY</div><div class="derived-val">${HUMANITY}</div></div>
+    <div class="derived-item"><div class="derived-label">IMPLANT LIM</div><div class="derived-val">${IMPL_LIM}</div></div>
+    <div class="derived-item"><div class="derived-label">RAM</div><div class="derived-val">—</div></div>
+  `;
+
+  validateBuild();
+}
+
+function validateBuild() {
   const errors = [];
-  const reqs = CLASS_REQUIREMENTS[cls] || {};
+  const fives = ABILITIES.filter(ab => abilityValues[ab] === 5);
+  if (fives.length > 2) errors.push(`❌ Нельзя иметь более двух характеристик на 5 (${fives.join(', ')})`);
+  if (getRemainingPoints() < 0) errors.push('❌ Потрачено больше 6 очков характеристик');
 
-  for (const [ab, min] of Object.entries(reqs)) {
-    if (scores[ab] < min) {
-      errors.push(`❌ ${ABILITY_NAMES[ab]} должна быть ≥ ${min} для класса (сейчас: ${scores[ab]})`);
-    }
-  }
-
-  // General rules
-  const total = ABILITIES.reduce((s,ab) => s + scores[ab], 0);
-  if (total > 120) errors.push('❌ Сумма всех характеристик слишком высокая (возможный читерство)');
-  if (total < 50)  errors.push('⚠️ Очень низкие характеристики — убедитесь, что всё правильно');
+  const levels = getSkillLevels();
+  const trained = levels.filter(s => s.bonus === 2).length;
+  const expert  = levels.filter(s => s.bonus === 4).length;
+  const master  = levels.filter(s => s.bonus === 6).length;
+  if (trained > 5)  errors.push(`❌ Обученных навыков: ${trained} (макс. 5)`);
+  if (expert > 1)   errors.push(`❌ Навыков Эксперт: ${expert} (макс. 1)`);
+  if (master > 0)   errors.push('❌ Уровень Мастер недоступен при создании');
 
   const errEl = document.getElementById('validation-errors');
   const okEl  = document.getElementById('validation-ok');
-
   if (errors.length > 0) {
     errEl.classList.remove('hidden');
     okEl.classList.add('hidden');
@@ -219,49 +435,35 @@ function validateBuild(cls, scores) {
   }
 }
 
-// === Save Character ===
+// ======= SAVE =======
 function saveCharacter() {
-  const name = document.getElementById('char-name').value.trim();
-  const race = document.getElementById('char-race').value;
-  const cls  = document.getElementById('char-class').value;
-  const bg   = document.getElementById('char-background').value;
-  const scores = getAbilityScores();
-  const bonuses = RACIAL_BONUSES[race] || {};
-  const finalScores = {};
-  ABILITIES.forEach(ab => { finalScores[ab] = Math.min(20, scores[ab] + (bonuses[ab]||0)); });
+  const char = {
+    name: v('char-name'), concept: v('char-concept'),
+    origin: v('char-origin'), k1: v('char-kit1'), k2: v('char-kit2'),
+    abilities: { ...abilityValues },
+    skills: getSkillLevels().filter(s => s.bonus !== null),
+    createdAt: Date.now()
+  };
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  saved.push(char);
+  localStorage.setItem('cp_characters', JSON.stringify(saved));
 
-  const character = { name, race, cls, bg, scores: finalScores, createdAt: Date.now() };
-  const saved = JSON.parse(localStorage.getItem('dnd_characters') || '[]');
-  saved.push(character);
-  localStorage.setItem('dnd_characters', JSON.stringify(saved));
-
-  if (tg) {
-    tg.sendData(JSON.stringify(character));
-  } else {
-    alert(`Персонаж «${name}» сохранён!`);
-  }
-
-  nextStep(5);
+  if (tg) tg.sendData(JSON.stringify(char));
+  else alert(`Персонаж «${char.name}» сохранён!`);
+  nextStep(6);
 }
 
 function loadSaved() {
-  const saved = JSON.parse(localStorage.getItem('dnd_characters') || '[]');
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const list = document.getElementById('saved-list');
-  if (saved.length === 0) {
-    list.innerHTML = '<p style="color:#888">Нет сохранённых персонажей</p>';
-    return;
-  }
-  const clsNames = {barbarian:'Варвар',bard:'Бард',cleric:'Жрец',druid:'Друид',fighter:'Воин',
-    monk:'Монах',paladin:'Паладин',ranger:'Следопыт',rogue:'Плут',sorcerer:'Чародей',
-    warlock:'Колдун',wizard:'Волшебник'};
-  const raceNames = {human:'Человек',elf:'Эльф',dwarf:'Дварф',halfling:'Полурослик',
-    dragonborn:'Драконорождённый',gnome:'Гном','half-elf':'Полуэльф',tiefling:'Тифлинг'};
+  if (!saved.length) { list.innerHTML = '<p style="color:#446688">Нет сохранённых персонажей</p>'; return; }
   list.innerHTML = saved.map((c,i) => `
     <div class="char-card">
-      <div class="char-info">
+      <div>
         <h3>${c.name}</h3>
-        <p>${raceNames[c.race]||c.race} · ${clsNames[c.cls]||c.cls}</p>
-        <p>STR:${c.scores.STR} DEX:${c.scores.DEX} CON:${c.scores.CON} INT:${c.scores.INT} WIS:${c.scores.WIS} CHA:${c.scores.CHA}</p>
+        <p>${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1} + ${KIT_LABELS[c.k2]||c.k2}</p>
+        <p>STR:${c.abilities?.STR} DEX:${c.abilities?.DEX} INT:${c.abilities?.INT} WIL:${c.abilities?.WIL} PER:${c.abilities?.PER} TEC:${c.abilities?.TEC}</p>
+        ${c.concept ? `<p><em>${c.concept}</em></p>` : ''}
       </div>
       <button class="btn-delete" onclick="deleteChar(${i})">🗑</button>
     </div>
@@ -269,22 +471,23 @@ function loadSaved() {
 }
 
 function deleteChar(i) {
-  const saved = JSON.parse(localStorage.getItem('dnd_characters') || '[]');
-  saved.splice(i, 1);
-  localStorage.setItem('dnd_characters', JSON.stringify(saved));
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  saved.splice(i,1);
+  localStorage.setItem('cp_characters', JSON.stringify(saved));
   loadSaved();
 }
 
 function newCharacter() {
-  document.getElementById('char-name').value = '';
-  document.getElementById('char-race').value = '';
-  document.getElementById('char-class').value = '';
-  document.getElementById('char-background').value = '';
+  abilityValues = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
+  ['char-name','char-concept','char-origin','char-kit1','char-kit2'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   initAbilityScores();
+  initSkills();
   showStep(1);
 }
 
-// === Init ===
+// ======= INIT =======
 initAbilityScores();
-ABILITIES.forEach(ab => updateMod(ab));
+initSkills();
 showStep(1);

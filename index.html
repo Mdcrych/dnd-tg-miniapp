@@ -3,121 +3,175 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D Character Builder</title>
+  <title>Cyberpunk Character Builder</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <header>
-      <h1>⚔️ D&D Character Builder</h1>
+      <h1>⚡ Cyberpunk Builder</h1>
+      <div id="header-sub">Rulebook v0.5</div>
     </header>
 
-    <!-- Step 1: Basic Info -->
+    <!-- Step 1: Concept & Origin -->
     <section id="step-basic" class="step active">
-      <h2>Шаг 1: Основное</h2>
+      <h2>Шаг 1: Концепт и происхождение</h2>
       <label>Имя персонажа
-        <input id="char-name" type="text" placeholder="Имя..." maxlength="40" />
+        <input id="char-name" type="text" placeholder="Ник или позывной..." maxlength="40" />
       </label>
-      <label>Раса
-        <select id="char-race">
-          <option value="">— Выберите расу —</option>
-          <option value="human">Человек</option>
-          <option value="elf">Эльф</option>
-          <option value="dwarf">Дварф</option>
-          <option value="halfling">Полурослик</option>
-          <option value="dragonborn">Драконорождённый</option>
-          <option value="gnome">Гном</option>
-          <option value="half-elf">Полуэльф</option>
-          <option value="tiefling">Тифлинг</option>
+      <label>Концепт (одна строка)
+        <input id="char-concept" type="text" placeholder="Кто ты в этом городе?" maxlength="80" />
+      </label>
+      <label>Происхождение
+        <select id="char-origin">
+          <option value="">— Выберите происхождение —</option>
+          <option value="corpo">Корпо-беглец (+2 Анализу в корп. среде)</option>
+          <option value="street">Уличный ребёнок (+2 Уличной смекалке в своём районе)</option>
+          <option value="military">Военный подрядчик (+2 тактическому распознаванию)</option>
+          <option value="clinic">Клинический специалист (+2 Медицине)</option>
+          <option value="media">Медиа-активист (+2 Исполнению в публичной сцене)</option>
+          <option value="netrunner">Сетевой бродяга (+2 Взлому в теневых сетях)</option>
+          <option value="smuggler">Контрабандист (+2 логистике и скрытой доставке)</option>
+          <option value="cult">Культ техно-плоти (+2 проверкам экзотичных имплантов)</option>
         </select>
       </label>
-      <label>Класс
-        <select id="char-class">
-          <option value="">— Выберите класс —</option>
-          <option value="barbarian">Варвар</option>
-          <option value="bard">Бард</option>
-          <option value="cleric">Жрец</option>
-          <option value="druid">Друид</option>
-          <option value="fighter">Воин</option>
-          <option value="monk">Монах</option>
-          <option value="paladin">Паладин</option>
-          <option value="ranger">Следопыт</option>
-          <option value="rogue">Плут</option>
-          <option value="sorcerer">Чародей</option>
-          <option value="warlock">Колдун</option>
-          <option value="wizard">Волшебник</option>
+      <label>Пакет подготовки #1
+        <select id="char-kit1">
+          <option value="">— Выберите пакет —</option>
+          <option value="merc">Уличный наёмник</option>
+          <option value="tech">Подпольный техник</option>
+          <option value="netrunner">Сетевой беглец</option>
+          <option value="ripper">Рипердок</option>
+          <option value="agitator">Агитатор сцены</option>
+          <option value="fixer">Фиксер района</option>
+          <option value="agent">Корпоративный агент</option>
+          <option value="courier">Курьер-призрак</option>
+          <option value="pilot">Пилот транспорта</option>
+          <option value="dronebuilder">Сборщик дронов</option>
         </select>
       </label>
-      <label>Предыстория
-        <select id="char-background">
-          <option value="">— Выберите предысторию —</option>
-          <option value="acolyte">Прислужник</option>
-          <option value="criminal">Преступник</option>
-          <option value="folk-hero">Народный герой</option>
-          <option value="noble">Дворянин</option>
-          <option value="sage">Мудрец</option>
-          <option value="soldier">Солдат</option>
+      <label>Пакет подготовки #2
+        <select id="char-kit2">
+          <option value="">— Выберите второй пакет —</option>
+          <option value="merc">Уличный наёмник</option>
+          <option value="tech">Подпольный техник</option>
+          <option value="netrunner">Сетевой беглец</option>
+          <option value="ripper">Рипердок</option>
+          <option value="agitator">Агитатор сцены</option>
+          <option value="fixer">Фиксер района</option>
+          <option value="agent">Корпоративный агент</option>
+          <option value="courier">Курьер-призрак</option>
+          <option value="pilot">Пилот транспорта</option>
+          <option value="dronebuilder">Сборщик дронов</option>
         </select>
       </label>
-      <button id="btn-next-1" onclick="nextStep(2)">Далее →</button>
+      <button onclick="nextStep(2)">Далее →</button>
     </section>
 
-    <!-- Step 2: Ability Scores -->
+    <!-- Step 2: Ability Scores (Point Buy) -->
     <section id="step-abilities" class="step">
       <h2>Шаг 2: Характеристики</h2>
-      <p class="hint">Бросьте 4d6 и уберите наименьший — или введите вручную (от 3 до 18)</p>
-      <div id="ability-scores">
-        <!-- Generated by JS -->
+      <p class="hint">Все характеристики стартуют с 3. Распределите <strong>6 очков</strong>.<br>
+        3→4 = 1 очко &nbsp;|&nbsp; 4→5 = 2 очка &nbsp;|&nbsp; макс. <strong>5</strong>, не более двух на 5.</p>
+      <div id="points-bar">
+        Очков осталось: <span id="points-left" class="pts">6</span>
       </div>
-      <button class="btn-roll" onclick="rollAllStats()">🎲 Бросить все (4d6 drop lowest)</button>
-      <div id="points-display" class="hidden">
-        Осталось очков: <span id="points-left">27</span>
+      <div id="ability-scores"></div>
+
+      <!-- Inline dice roll popup -->
+      <div id="ability-roll-popup" class="popup hidden">
+        <div class="popup-inner">
+          <div class="popup-title" id="popup-title">Проверка STR</div>
+          <div class="popup-formula" id="popup-formula">1d20 + мод</div>
+          <div class="dc-row">
+            <label>DC:
+              <select id="popup-dc">
+                <option value="8">8 — Очень легко</option>
+                <option value="10">10 — Легко</option>
+                <option value="13" selected>13 — Стандартно</option>
+                <option value="16">16 — Трудно</option>
+                <option value="19">19 — Очень трудно</option>
+                <option value="22">22 — Экстремально</option>
+              </select>
+            </label>
+            <label>Навык:
+              <select id="popup-skill">
+                <option value="0">Необучен (+0)</option>
+                <option value="2">Обучен (+2)</option>
+                <option value="4">Эксперт (+4)</option>
+                <option value="6">Мастер (+6)</option>
+              </select>
+            </label>
+          </div>
+          <div class="adv-row">
+            <label><input type="radio" name="adv" value="normal" checked /> Обычный</label>
+            <label><input type="radio" name="adv" value="advantage" /> Преимущество (2d20 лучший)</label>
+            <label><input type="radio" name="adv" value="disadvantage" /> Помеха (2d20 худший)</label>
+          </div>
+          <button class="btn-roll-check" id="popup-roll-btn" onclick="executeRoll()">🎲 Бросить</button>
+          <div id="popup-result" class="popup-result hidden"></div>
+          <button class="btn-close" onclick="closePopup()">✕ Закрыть</button>
+        </div>
       </div>
+
       <div class="nav-buttons">
         <button onclick="prevStep(1)">← Назад</button>
-        <button id="btn-next-2" onclick="nextStep(3)">Далее →</button>
+        <button onclick="nextStep(3)">Далее →</button>
       </div>
     </section>
 
-    <!-- Step 3: Dice Roller -->
-    <section id="step-dice" class="step">
-      <h2>Шаг 3: Бросок кубиков</h2>
-      <div class="dice-grid">
-        <button class="dice" onclick="rollDice(4)">d4</button>
-        <button class="dice" onclick="rollDice(6)">d6</button>
-        <button class="dice" onclick="rollDice(8)">d8</button>
-        <button class="dice" onclick="rollDice(10)">d10</button>
-        <button class="dice" onclick="rollDice(12)">d12</button>
-        <button class="dice" onclick="rollDice(20)">d20</button>
-        <button class="dice d100" onclick="rollDice(100)">d100</button>
-      </div>
-      <div id="dice-count-row">
-        <label>Количество кубиков:
-          <input id="dice-count" type="number" min="1" max="20" value="1" />
-        </label>
-      </div>
-      <div id="roll-result" class="roll-result hidden"></div>
-      <div id="roll-history" class="roll-history"></div>
+    <!-- Step 3: Skills -->
+    <section id="step-skills" class="step">
+      <h2>Шаг 3: Навыки</h2>
+      <p class="hint">Выберите <strong>5 навыков Обучен</strong>, <strong>1 Эксперт</strong> и <strong>1 специализацию</strong>.</p>
+      <div id="skills-container"></div>
       <div class="nav-buttons">
         <button onclick="prevStep(2)">← Назад</button>
         <button onclick="nextStep(4)">Далее →</button>
       </div>
     </section>
 
-    <!-- Step 4: Summary & Validation -->
-    <section id="step-summary" class="step">
-      <h2>Шаг 4: Итог персонажа</h2>
-      <div id="summary-content"></div>
-      <div id="validation-errors" class="errors hidden"></div>
-      <div id="validation-ok" class="success hidden">✅ Билд корректен!</div>
+    <!-- Step 4: Dice Roller -->
+    <section id="step-dice" class="step">
+      <h2>Шаг 4: Кубики</h2>
+      <p class="hint">d20 для проверок. d4–d12 для урона.</p>
+      <div class="dice-grid">
+        <button class="dice" onclick="rollDice(4)">d4</button>
+        <button class="dice" onclick="rollDice(6)">d6</button>
+        <button class="dice" onclick="rollDice(8)">d8</button>
+        <button class="dice" onclick="rollDice(10)">d10</button>
+        <button class="dice" onclick="rollDice(12)">d12</button>
+        <button class="dice dice-d20" onclick="rollDice(20)">d20</button>
+      </div>
+      <div id="dice-count-row">
+        <label>Кол-во кубиков:
+          <input id="dice-count" type="number" min="1" max="20" value="1" />
+        </label>
+      </div>
+      <div id="roll-result" class="roll-result hidden"></div>
+      <div class="roll-history-label">История бросков</div>
+      <div id="roll-history" class="roll-history"></div>
       <div class="nav-buttons">
         <button onclick="prevStep(3)">← Назад</button>
-        <button id="btn-save" onclick="saveCharacter()" class="btn-primary">💾 Сохранить персонажа</button>
+        <button onclick="nextStep(5)">Далее →</button>
       </div>
     </section>
 
-    <!-- Saved Characters -->
+    <!-- Step 5: Summary & Validation -->
+    <section id="step-summary" class="step">
+      <h2>Шаг 5: Лист персонажа</h2>
+      <div id="summary-content"></div>
+      <div id="derived-stats"></div>
+      <div id="validation-errors" class="errors hidden"></div>
+      <div id="validation-ok" class="success hidden">✅ Билд валиден по правилам!</div>
+      <div class="nav-buttons">
+        <button onclick="prevStep(4)">← Назад</button>
+        <button id="btn-save" class="btn-primary" onclick="saveCharacter()">💾 Сохранить персонажа</button>
+      </div>
+    </section>
+
+    <!-- Saved -->
     <section id="step-saved" class="step">
       <h2>Сохранённые персонажи</h2>
       <div id="saved-list"></div>
