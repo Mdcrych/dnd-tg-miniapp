@@ -1,0 +1,11 @@
+{
+  "name": "dnd-tg-miniapp",
+  "version": "1.0.0",
+  "description": "D&D Character Builder Telegram Mini App",
+  "scripts": {
+    "dev": "npx serve .",
+    "lint": "npx eslint app.js"
+  },
+  "keywords": ["telegram", "miniapp", "dnd", "character-builder"],
+  "license": "MIT"
+}
