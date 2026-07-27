@@ -29,10 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btn) btn.addEventListener('click', triggerInstall);
 });
 
-// ======= Telegram (optional) =======
-const tg = window.Telegram?.WebApp ?? null;
-if (tg) { tg.ready(); tg.expand(); }
-
 // ======= DATA =======
 const ABILITIES = ['STR','DEX','INT','WIL','PER','TEC'];
 const AB_FULL = {
@@ -169,8 +165,7 @@ function validateStep(s) {
 
 function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
 function err(msg) {
-  if (tg?.showAlert) tg.showAlert(msg);
-  else alert(msg);
+  alert(msg);
   return false;
 }
 
@@ -387,12 +382,6 @@ function executeRoll() {
     <div class="res-verdict ${cls}">${verdict}</div>
   `;
 
-  if (tg?.HapticFeedback) {
-    if (isCritSuccess) tg.HapticFeedback.notificationOccurred('success');
-    else if (isCritFail) tg.HapticFeedback.notificationOccurred('error');
-    else tg.HapticFeedback.impactOccurred('medium');
-  }
-
   addHistory(`${ab}: d20=${chosen} ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess?'КРИТ!':isCritFail?'ФЕЙЛ!':diff>=0?'Успех':'Провал'}`);
 }
 
@@ -505,7 +494,6 @@ function rollDice(sides) {
   resultEl.classList.remove('hidden');
   resultEl.textContent = label;
   addHistory(label);
-  if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
 function addHistory(text) {
@@ -623,7 +611,6 @@ function saveCharacter() {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   saved.push(char);
   localStorage.setItem('cp_characters', JSON.stringify(saved));
-  if (tg?.sendData) tg.sendData(JSON.stringify(char));
   nextStep(7);
 }
 
@@ -666,7 +653,6 @@ function openCharSheet(charIndex) {
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
 
-  // Специализация — выводится из скиллов развития
   const devSkillNames = c.devSkills || [];
   const specializations = devSkillNames.map(name => {
     const sk = DEV_SKILLS.find(d => d.name === name);
