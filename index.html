@@ -8,20 +8,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="CP Builder" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="Cyberpunk Character Builder" />
   <meta property="og:description" content="Собери персонажа для Cyberpunk/DnD прямо в браузере — без регистрации, работает офлайн" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mdcrych.github.io/dnd-tg-miniapp/" />
-
   <title>Cyberpunk Character Builder</title>
-
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Telegram SDK: loaded only if running inside Telegram, safe to ignore otherwise -->
   <script src="https://telegram.org/js/telegram-web-app.js" onerror="window.__tgLoadFailed=true"></script>
 </head>
 <body>
@@ -29,7 +23,6 @@
     <header>
       <h1>⚡ Cyberpunk Builder</h1>
       <div id="header-sub">Rulebook v0.5</div>
-      <!-- PWA install prompt -->
       <button id="btn-install" class="btn-install hidden" aria-label="Установить приложение">📲 Установить</button>
     </header>
 
@@ -88,7 +81,7 @@
       <button onclick="nextStep(2)">Далее →</button>
     </section>
 
-    <!-- Step 2: Ability Scores (Point Buy) -->
+    <!-- Step 2: Ability Scores -->
     <section id="step-abilities" class="step">
       <h2>Шаг 2: Характеристики</h2>
       <p class="hint">Все характеристики стартуют с 3. Распределите <strong>6 очков</strong>.<br>
@@ -98,7 +91,6 @@
       </div>
       <div id="ability-scores"></div>
 
-      <!-- Inline dice roll popup -->
       <div id="ability-roll-popup" class="popup hidden">
         <div class="popup-inner">
           <div class="popup-title" id="popup-title">Проверка STR</div>
@@ -140,10 +132,11 @@
       </div>
     </section>
 
-    <!-- Step 3: Skills -->
+    <!-- Step 3: Skills (без специализации) -->
     <section id="step-skills" class="step">
       <h2>Шаг 3: Навыки</h2>
-      <p class="hint">Выберите <strong>5 навыков Обучен</strong>, <strong>1 Эксперт</strong> и <strong>1 специализацию</strong>.</p>
+      <p class="hint">Выберите <strong>5 навыков Обучен</strong> и <strong>1 Эксперт</strong>.<br>
+        Специализация определяется выбранными скиллами развития на следующем шаге.</p>
       <div id="skills-container"></div>
       <div class="nav-buttons">
         <button onclick="prevStep(2)">← Назад</button>
@@ -151,9 +144,22 @@
       </div>
     </section>
 
-    <!-- Step 4: Dice Roller -->
+    <!-- Step 4: Dev Skills -->
+    <section id="step-devskills" class="step">
+      <h2>Шаг 4: Скиллы развития</h2>
+      <p class="hint">Выберите <strong>до 2 скиллов развития</strong>. Скиллы привязаны к классам, но доступны любому персонажу.<br>
+        Класс указан рядом с каждым скиллом.</p>
+      <div id="devskills-count" class="devskills-count">Выбрано: 0 / 2</div>
+      <div id="devskills-container"></div>
+      <div class="nav-buttons">
+        <button onclick="prevStep(3)">← Назад</button>
+        <button onclick="nextStep(5)">Далее →</button>
+      </div>
+    </section>
+
+    <!-- Step 5: Dice Roller -->
     <section id="step-dice" class="step">
-      <h2>Шаг 4: Кубики</h2>
+      <h2>Шаг 5: Кубики</h2>
       <p class="hint">d20 для проверок. d4–d12 для урона.</p>
       <div class="dice-grid">
         <button class="dice" onclick="rollDice(4)">d4</button>
@@ -172,33 +178,43 @@
       <div class="roll-history-label">История бросков</div>
       <div id="roll-history" class="roll-history"></div>
       <div class="nav-buttons">
-        <button onclick="prevStep(3)">← Назад</button>
-        <button onclick="nextStep(5)">Далее →</button>
+        <button onclick="prevStep(4)">← Назад</button>
+        <button onclick="nextStep(6)">Далее →</button>
       </div>
     </section>
 
-    <!-- Step 5: Summary & Validation -->
+    <!-- Step 6: Summary & Validation -->
     <section id="step-summary" class="step">
-      <h2>Шаг 5: Лист персонажа</h2>
+      <h2>Шаг 6: Лист персонажа</h2>
       <div id="summary-content"></div>
       <div id="derived-stats"></div>
       <div id="validation-errors" class="errors hidden"></div>
       <div id="validation-ok" class="success hidden">✅ Билд валиден по правилам!</div>
       <div class="nav-buttons">
-        <button onclick="prevStep(4)">← Назад</button>
+        <button onclick="prevStep(5)">← Назад</button>
         <button id="btn-save" class="btn-primary" onclick="saveCharacter()">💾 Сохранить персонажа</button>
       </div>
     </section>
 
-    <!-- Saved -->
+    <!-- Step 7: Saved list -->
     <section id="step-saved" class="step">
       <h2>Сохранённые персонажи</h2>
+      <p class="hint">Нажми на персонажа, чтобы открыть полный лист.</p>
       <div id="saved-list"></div>
       <div class="nav-buttons">
         <button onclick="newCharacter()">➕ Новый персонаж</button>
         <button id="btn-export" onclick="exportChars()">📤 Экспорт JSON</button>
         <button id="btn-import-trigger" onclick="document.getElementById('import-file').click()">📥 Импорт JSON</button>
         <input type="file" id="import-file" accept=".json" style="display:none" onchange="importChars(event)" />
+      </div>
+    </section>
+
+    <!-- Step 8: Character Sheet subpage -->
+    <section id="step-charsheet" class="step">
+      <h2>Лист персонажа</h2>
+      <div id="charsheet-content"></div>
+      <div class="nav-buttons">
+        <button onclick="prevStep(7); loadSaved();">← К списку</button>
       </div>
     </section>
   </div>
