@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cp-builder-v6';
+const CACHE_VERSION = 'cp-builder-v7';
 const ASSETS = [
   '/dnd-tg-miniapp/',
   '/dnd-tg-miniapp/index.html',
@@ -26,7 +26,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
 
-  // Network-first для navigate (новый заход на страницу) — обновляет кэш
+  // Network-first для navigate (новый заход) — обновляет кэш
+  // Если страница уже открыта, браузер не шлёт navigate, поэтому обновление не мешает
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
@@ -40,15 +41,16 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cache-first для статики (JS, CSS, иконки) — страница уже открыта
+  // Stale-while-revalidate для JS/CSS: отдаём кэш мгновенно, обновляем в фоне
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
-        return res;
-      });
-    })
+    caches.open(CACHE_VERSION).then(cache =>
+      cache.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(res => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => null);
+        return cached || fetchPromise;
+      })
+    )
   );
 });

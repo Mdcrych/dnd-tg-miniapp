@@ -63,48 +63,37 @@ const SKILLS = [
   { name: 'Выживание в городе', base: 'PER' },
 ];
 
-// ======= DEV SKILLS =======
 const DEV_SKILLS = [
-  // Уличный наёмник (merc)
   { name: 'Боевое чутьё',         class: 'merc',        classLabel: 'Уличный наёмник',     desc: 'Раз в сцену переброси один промах в рукопашной.' },
   { name: 'Щит из тела',          class: 'merc',        classLabel: 'Уличный наёмник',     desc: 'Используй союзника как укрытие без штрафа к атаке.' },
   { name: 'Берсерк',              class: 'merc',        classLabel: 'Уличный наёмник',     desc: '+2 к урону в ближнем бою пока HP < 50%.' },
-  // Подпольный техник (tech)
   { name: 'Полевой ремонт',       class: 'tech',        classLabel: 'Подпольный техник',   desc: 'Чини снаряжение без инструментов с DC +2.' },
   { name: 'Самодельный гаджет',   class: 'tech',        classLabel: 'Подпольный техник',   desc: 'Раз в день создай одноразовый гаджет из хлама.' },
   { name: 'Точная сборка',        class: 'tech',        classLabel: 'Подпольный техник',   desc: '+4 к TEC-проверкам при тонкой работе с механикой.' },
-  // Сетевой беглец (netrunner)
   { name: 'Быстрый взлом',        class: 'netrunner',   classLabel: 'Сетевой беглец',      desc: 'Взлом ICE занимает действие, а не раунд.' },
   { name: 'Цифровой призрак',     class: 'netrunner',   classLabel: 'Сетевой беглец',      desc: 'Не оставляешь следов в сети при успешном Взломе.' },
   { name: 'Перегрузка',           class: 'netrunner',   classLabel: 'Сетевой беглец',      desc: 'Нанеси 1d6 урона нейро-интерфейсу цели через сеть.' },
-  // Рипердок (ripper)
   { name: 'Экстренная операция',  class: 'ripper',      classLabel: 'Рипердок',            desc: 'Стабилизируй умирающего за бонусное действие.' },
   { name: 'Отладка импланта',     class: 'ripper',      classLabel: 'Рипердок',            desc: 'Сними дебафф импланта без клиники (DC 14 TEC).' },
   { name: 'Синтетическая кровь',  class: 'ripper',      classLabel: 'Рипердок',            desc: 'Один раз в день восстанови 1d6+TEC HP союзнику.' },
-  // Агитатор сцены (agitator)
   { name: 'Зажигательная речь',   class: 'agitator',    classLabel: 'Агитатор сцены',      desc: '+2 к Убеждению при публичных выступлениях.' },
   { name: 'Слухи района',         class: 'agitator',    classLabel: 'Агитатор сцены',      desc: 'Раз в сцену узнай одну скрытую информацию о локации.' },
   { name: 'Медийный образ',       class: 'agitator',    classLabel: 'Агитатор сцены',      desc: 'Репутация работает как дополнительный навык в публичных местах.' },
-  // Фиксер района (fixer)
-  { name: 'Чёрный рынок',        class: 'fixer',        classLabel: 'Фиксер района',       desc: 'Достань любой товар за 1d4 часа (доступность −1 ступень).' },
-  { name: 'Нужный человек',       class: 'fixer',        classLabel: 'Фиксер района',       desc: 'Раз в сессию вызови контакт без Переговоров.' },
-  { name: 'Крыша',                class: 'fixer',        classLabel: 'Фиксер района',       desc: 'Группа защищена от случайных уличных атак в твоём районе.' },
-  // Корпоративный агент (agent)
-  { name: 'Протокол прикрытия',   class: 'agent',        classLabel: 'Корпоративный агент', desc: 'Раз в сцену легенда выдерживает проверку PER DC 14.' },
-  { name: 'Корпоративный доступ', class: 'agent',        classLabel: 'Корпоративный агент', desc: '+3 к Анализу при работе с корп-базами данных.' },
-  { name: 'Нейтрализация',        class: 'agent',        classLabel: 'Корпоративный агент', desc: 'Допрос даёт +2 к следующей Лжи или Запугиванию.' },
-  // Курьер-призрак (courier)
-  { name: 'Городской паркур',     class: 'courier',      classLabel: 'Курьер-призрак',      desc: 'Передвигайся по сложному рельефу без штрафа скорости.' },
-  { name: 'Мёртвая зона',         class: 'courier',      classLabel: 'Курьер-призрак',      desc: 'Знаешь 1d4 безопасных мест в любом районе.' },
-  { name: 'Скорая доставка',      class: 'courier',      classLabel: 'Курьер-призрак',      desc: 'Раз в сессию прибудь в любую точку города без случайных встреч.' },
-  // Пилот транспорта (pilot)
-  { name: 'Экстремальный манёвр', class: 'pilot',        classLabel: 'Пилот транспорта',    desc: 'Раз в сцену не считай штраф за опасный манёвр.' },
-  { name: 'Знание техники',       class: 'pilot',        classLabel: 'Пилот транспорта',    desc: '+2 к Ремонту и Электронике на транспортных средствах.' },
-  { name: 'Слияние с машиной',    class: 'pilot',        classLabel: 'Пилот транспорта',    desc: 'Транспорт считается продолжением тела: +1 DEF при вождении.' },
-  // Сборщик дронов (dronebuilder)
-  { name: 'Рой дронов',           class: 'dronebuilder', classLabel: 'Сборщик дронов',      desc: 'Управляй двумя дронами одновременно без штрафа.' },
-  { name: 'Автономный режим',     class: 'dronebuilder', classLabel: 'Сборщик дронов',      desc: 'Дрон действует по приказу 1 раунд без проверки TEC.' },
-  { name: 'Экстренный апгрейд',   class: 'dronebuilder', classLabel: 'Сборщик дронов',      desc: 'Раз в сессию добавь временный модуль к дрону (+1d4 эффект).' },
+  { name: 'Чёрный рынок',         class: 'fixer',       classLabel: 'Фиксер района',       desc: 'Достань любой товар за 1d4 часа (доступность −1 ступень).' },
+  { name: 'Нужный человек',       class: 'fixer',       classLabel: 'Фиксер района',       desc: 'Раз в сессию вызови контакт без Переговоров.' },
+  { name: 'Крыша',                class: 'fixer',       classLabel: 'Фиксер района',       desc: 'Группа защищена от случайных уличных атак в твоём районе.' },
+  { name: 'Протокол прикрытия',   class: 'agent',       classLabel: 'Корпоративный агент', desc: 'Раз в сцену легенда выдерживает проверку PER DC 14.' },
+  { name: 'Корпоративный доступ', class: 'agent',       classLabel: 'Корпоративный агент', desc: '+3 к Анализу при работе с корп-базами данных.' },
+  { name: 'Нейтрализация',        class: 'agent',       classLabel: 'Корпоративный агент', desc: 'Допрос даёт +2 к следующей Лжи или Запугиванию.' },
+  { name: 'Городской паркур',     class: 'courier',     classLabel: 'Курьер-призрак',      desc: 'Передвигайся по сложному рельефу без штрафа скорости.' },
+  { name: 'Мёртвая зона',         class: 'courier',     classLabel: 'Курьер-призрак',      desc: 'Знаешь 1d4 безопасных мест в любом районе.' },
+  { name: 'Скорая доставка',      class: 'courier',     classLabel: 'Курьер-призрак',      desc: 'Раз в сессию прибудь в любую точку города без случайных встреч.' },
+  { name: 'Экстремальный манёвр', class: 'pilot',       classLabel: 'Пилот транспорта',    desc: 'Раз в сцену не считай штраф за опасный манёвр.' },
+  { name: 'Знание техники',       class: 'pilot',       classLabel: 'Пилот транспорта',    desc: '+2 к Ремонту и Электронике на транспортных средствах.' },
+  { name: 'Слияние с машиной',    class: 'pilot',       classLabel: 'Пилот транспорта',    desc: 'Транспорт считается продолжением тела: +1 DEF при вождении.' },
+  { name: 'Рой дронов',           class: 'dronebuilder',classLabel: 'Сборщик дронов',      desc: 'Управляй двумя дронами одновременно без штрафа.' },
+  { name: 'Автономный режим',     class: 'dronebuilder',classLabel: 'Сборщик дронов',      desc: 'Дрон действует по приказу 1 раунд без проверки TEC.' },
+  { name: 'Экстренный апгрейд',   class: 'dronebuilder',classLabel: 'Сборщик дронов',      desc: 'Раз в сессию добавь временный модуль к дрону (+1d4 эффект).' },
 ];
 
 const KIT_LABELS = {
@@ -118,6 +107,7 @@ const ORIGIN_LABELS = {
   clinic: 'Клинический специалист', media: 'Медиа-активист',
   netrunner: 'Сетевой бродяга', smuggler: 'Контрабандист', cult: 'Культ техно-плоти',
 };
+const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
 
 // ======= STATE =======
 let abilityValues = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
@@ -125,23 +115,26 @@ let TOTAL_POINTS = 6;
 let selectedDevSkills = [];
 let currentPopupAb = null;
 let currentPopupAbValues = null;
+// Стек навигации для кнопки «Назад» на подстраницах
+let navStack = [];
 
 // ======= STEP NAVIGATION =======
-// Steps: 1=basic, 2=abilities, 3=skills, 4=devskills, 5=dice, 6=summary, 7=saved, 8=char-sheet
-// Subpages: 9=skills-subpage (из charsheet), 10=devskills-subpage (из charsheet)
+// Steps: 1=basic, 2=abilities, 3=skills, 4=devskills, 5=dice, 6=summary, 7=saved
+// Subpages: 8=char-sheet, 9=skills-sub, 10=devskills-sub
+const STEP_IDS = [
+  'step-basic','step-abilities','step-skills','step-devskills',
+  'step-dice','step-summary','step-saved','step-charsheet',
+  'step-skills-sub','step-devskills-sub'
+];
+
 function showStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  const ids = [
-    'step-basic','step-abilities','step-skills','step-devskills',
-    'step-dice','step-summary','step-saved','step-charsheet',
-    'step-skills-sub','step-devskills-sub'
-  ];
-  const el = document.getElementById(ids[n-1]);
+  const el = document.getElementById(STEP_IDS[n - 1]);
   if (el) el.classList.add('active');
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
 }
 function nextStep(n) {
-  if (!validateStep(n-1)) return;
+  if (!validateStep(n - 1)) return;
   if (n === 4) initDevSkills();
   if (n === 6) buildSummary();
   if (n === 7) loadSaved();
@@ -164,16 +157,19 @@ function validateStep(s) {
 }
 
 function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
-function err(msg) {
-  alert(msg);
-  return false;
-}
+function err(msg) { alert(msg); return false; }
 
 // ======= ABILITY SCORES (step 2) =======
 function initAbilityScores() {
   const c = document.getElementById('ability-scores');
-  c.innerHTML = ABILITIES.map(ab => `
-    <div class="ability-block" id="ab-block-${ab}" onclick="openPopup('${ab}', null)">
+  // Используем DocumentFragment для быстрой вставки
+  const frag = document.createDocumentFragment();
+  ABILITIES.forEach(ab => {
+    const div = document.createElement('div');
+    div.className = 'ability-block';
+    div.id = `ab-block-${ab}`;
+    div.onclick = () => openPopup(ab, null);
+    div.innerHTML = `
       <div class="ability-tag">${ab}</div>
       <div class="ability-name-full">${AB_FULL[ab]}</div>
       <div class="ability-controls">
@@ -182,9 +178,11 @@ function initAbilityScores() {
         <button class="ab-btn" onclick="event.stopPropagation(); changeAb('${ab}',+1)">+</button>
       </div>
       <div class="ab-mod" id="ab-mod-${ab}"></div>
-      <div class="dice-hint">нажми → бросок проверки</div>
-    </div>
-  `).join('');
+      <div class="dice-hint">нажми → бросок проверки</div>`;
+    frag.appendChild(div);
+  });
+  c.innerHTML = '';
+  c.appendChild(frag);
   ABILITIES.forEach(ab => refreshAb(ab));
   refreshPoints();
 }
@@ -206,9 +204,7 @@ function pointCost(from, to) {
   return c;
 }
 function totalSpent() {
-  let s = 0;
-  ABILITIES.forEach(ab => { s += pointCost(3, abilityValues[ab]); });
-  return s;
+  return ABILITIES.reduce((s, ab) => s + pointCost(3, abilityValues[ab]), 0);
 }
 function getRemainingPoints() { return TOTAL_POINTS - totalSpent(); }
 
@@ -235,24 +231,18 @@ function validateAbilities() {
 function openPopup(ab, abValues) {
   currentPopupAb = ab;
   currentPopupAbValues = abValues || abilityValues;
-
   const val = currentPopupAbValues[ab] ?? 3;
   const mod = AB_MOD[val] ?? 0;
   const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
-
   document.getElementById('popup-title').textContent = `Бросок: ${AB_FULL[ab]} (${ab})`;
-  document.getElementById('popup-formula').textContent =
-    `1d20 ${modStr} (мод) + навык + ситуатив`;
-
+  document.getElementById('popup-formula').textContent = `1d20 ${modStr} (мод) + навык + ситуатив`;
   document.getElementById('popup-result').classList.add('hidden');
   clearPopupErrors();
   const advNormal = document.querySelector('input[name=adv][value=normal]');
   if (advNormal) advNormal.checked = true;
   document.getElementById('popup-dc').value = '13';
   document.getElementById('popup-skill').value = '0';
-
   document.getElementById('ability-roll-popup').classList.remove('hidden');
-
   document.querySelectorAll('.ability-block').forEach(b => b.classList.remove('active-popup'));
   document.getElementById(`ab-block-${ab}`)?.classList.add('active-popup');
 }
@@ -282,8 +272,7 @@ function clearFieldError(fieldId) {
   const el = document.getElementById(fieldId);
   if (!el) return;
   el.classList.remove('input-error');
-  const hint = el.parentElement?.querySelector('.field-error-hint');
-  if (hint) hint.remove();
+  el.parentElement?.querySelector('.field-error-hint')?.remove();
 }
 function clearPopupErrors() {
   ['popup-dc','popup-skill','dice-count'].forEach(clearFieldError);
@@ -292,31 +281,17 @@ function clearPopupErrors() {
 function validatePopupInputs() {
   let valid = true;
   clearPopupErrors();
-
-  const dcEl = document.getElementById('popup-dc');
-  const dc = parseInt(dcEl?.value);
-  if (isNaN(dc) || dc < 1 || dc > 30) {
-    showFieldError('popup-dc', 'DC: число от 1 до 30');
-    valid = false;
-  }
-
-  const skillEl = document.getElementById('popup-skill');
-  const skill = parseInt(skillEl?.value);
-  if (![0, 2, 4, 6].includes(skill)) {
-    showFieldError('popup-skill', 'Выберите уровень навыка');
-    valid = false;
-  }
-
-  const advEl = document.querySelector('input[name=adv]:checked');
-  if (!advEl) valid = false;
-
+  const dc = parseInt(document.getElementById('popup-dc')?.value);
+  if (isNaN(dc) || dc < 1 || dc > 30) { showFieldError('popup-dc', 'DC: число от 1 до 30'); valid = false; }
+  const skill = parseInt(document.getElementById('popup-skill')?.value);
+  if (![0, 2, 4, 6].includes(skill)) { showFieldError('popup-skill', 'Выберите уровень навыка'); valid = false; }
+  if (!document.querySelector('input[name=adv]:checked')) valid = false;
   return valid;
 }
 
 function validateDiceCount() {
   clearFieldError('dice-count');
-  const el = document.getElementById('dice-count');
-  const val = parseInt(el?.value);
+  const val = parseInt(document.getElementById('dice-count')?.value);
   if (isNaN(val) || val < 1 || val > 20) {
     showFieldError('dice-count', 'Кол-во кубиков: от 1 до 20');
     return false;
@@ -330,9 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isNaN(val) && val >= 1 && val <= 30) clearFieldError('popup-dc');
     else showFieldError('popup-dc', 'DC: число от 1 до 30');
   });
-  document.getElementById('popup-skill')?.addEventListener('change', () => {
-    clearFieldError('popup-skill');
-  });
+  document.getElementById('popup-skill')?.addEventListener('change', () => clearFieldError('popup-skill'));
   document.getElementById('dice-count')?.addEventListener('input', () => {
     const val = parseInt(document.getElementById('dice-count').value);
     if (!isNaN(val) && val >= 1 && val <= 20) clearFieldError('dice-count');
@@ -343,45 +316,36 @@ document.addEventListener('DOMContentLoaded', () => {
 // ======= EXECUTE ROLL =======
 function executeRoll() {
   if (!validatePopupInputs()) return;
-
-  const ab  = currentPopupAb;
+  const ab = currentPopupAb;
   const abVals = currentPopupAbValues || abilityValues;
   if (!ab) return;
-
-  const val  = abVals[ab] ?? 3;
-  const mod  = AB_MOD[val] ?? 0;
+  const val = abVals[ab] ?? 3;
+  const mod = AB_MOD[val] ?? 0;
   const skillBonus = parseInt(document.getElementById('popup-skill').value) || 0;
   const dc   = parseInt(document.getElementById('popup-dc').value) || 13;
   const adv  = document.querySelector('input[name=adv]:checked')?.value || 'normal';
-
   let d1 = roll20(), d2 = roll20(), chosen, rolls;
   if (adv === 'advantage')      { chosen = Math.max(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
   else if (adv === 'disadvantage') { chosen = Math.min(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
-  else                           { chosen = d1; rolls = `${d1}`; }
-
+  else                              { chosen = d1; rolls = `${d1}`; }
   const total = chosen + mod + skillBonus;
   const isCritSuccess = chosen === 20;
   const isCritFail    = chosen === 1;
   const diff = total - dc;
-
   let verdict, cls;
   if (isCritFail)         { verdict = '💀 Крит. провал! Осложнение.'; cls = 'crit-fail'; }
-  else if (isCritSuccess) { verdict = '⚡ Крит. успех!';             cls = 'crit-success'; }
-  else if (diff >= 0)     { verdict = `✅ Успех! (+${diff} к DC)`;        cls = 'success'; }
-  else if (diff >= -2)    { verdict = `⚠️ Ценой? (не хв. ${Math.abs(diff)})`;   cls = 'close'; }
+  else if (isCritSuccess) { verdict = '⚡ Крит. успех!';              cls = 'crit-success'; }
+  else if (diff >= 0)     { verdict = `✅ Успех! (+${diff} к DC)`;    cls = 'success'; }
+  else if (diff >= -2)    { verdict = `⚠️ Ценой? (не хв. ${Math.abs(diff)})`; cls = 'close'; }
   else                    { verdict = `❌ Провал (хв. ${Math.abs(diff)})`;     cls = 'fail'; }
-
   const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
   const sklStr = skillBonus > 0 ? ` + ${skillBonus}` : '';
-
   const resEl = document.getElementById('popup-result');
   resEl.classList.remove('hidden');
   resEl.innerHTML = `
     <div class="res-dice">d20: ${rolls}</div>
     <div class="res-total">${chosen} (d20) ${modStr} (${AB_FULL[ab]})${sklStr} = <strong>${total}</strong> vs DC ${dc}</div>
-    <div class="res-verdict ${cls}">${verdict}</div>
-  `;
-
+    <div class="res-verdict ${cls}">${verdict}</div>`;
   addHistory(`${ab}: d20=${chosen} ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess?'КРИТ!':isCritFail?'ФЕЙЛ!':diff>=0?'Успех':'Провал'}`);
 }
 
@@ -390,21 +354,26 @@ function roll20() { return Math.ceil(Math.random() * 20); }
 // ======= SKILLS (step 3) =======
 function initSkills() {
   const c = document.getElementById('skills-container');
-  c.innerHTML = SKILLS.map((sk, i) => `
-    <div class="skill-row">
+  const frag = document.createDocumentFragment();
+  SKILLS.forEach((sk, i) => {
+    const div = document.createElement('div');
+    div.className = 'skill-row';
+    div.innerHTML = `
       <div class="skill-label">
         <div class="skill-name">${sk.name}</div>
         <div class="skill-base">${sk.base}</div>
       </div>
-      <select class="skill-select" id="sk-${i}" onchange="onSkillChange()">
+      <select class="skill-select" id="sk-${i}">
         <option value="">—</option>
         <option value="0">Необучен</option>
         <option value="2">Обучен</option>
         <option value="4">Эксперт</option>
         <option value="6">Мастер</option>
-      </select>
-    </div>
-  `).join('');
+      </select>`;
+    frag.appendChild(div);
+  });
+  c.innerHTML = '';
+  c.appendChild(frag);
 }
 
 function getSkillLevels() {
@@ -413,7 +382,6 @@ function getSkillLevels() {
     return { name: sk.name, base: sk.base, bonus: val === '' ? null : parseInt(val) };
   });
 }
-function onSkillChange() {}
 
 function validateSkills() {
   const levels = getSkillLevels();
@@ -425,6 +393,8 @@ function validateSkills() {
 }
 
 // ======= DEV SKILLS (step 4) =======
+// Скиллы развития — отдельная подстраница с группировкой по классам.
+// Выбрать можно любой скилл (до 2), независимо от класса персонажа.
 function initDevSkills() {
   const c = document.getElementById('devskills-container');
   const byClass = {};
@@ -433,27 +403,35 @@ function initDevSkills() {
     byClass[sk.class].push(sk);
   });
 
-  c.innerHTML = Object.entries(byClass).map(([cls, skills]) => `
-    <div class="devskill-group">
-      <div class="devskill-group-title">🏷 ${skills[0].classLabel}</div>
-      ${skills.map(sk => {
-        const checked = selectedDevSkills.includes(sk.name) ? 'checked' : '';
-        return `
-          <label class="devskill-row ${checked ? 'devskill-selected' : ''}" id="dsl-${sk.name.replace(/\s/g,'-')}">
-            <input type="checkbox" class="devskill-cb" value="${sk.name}" ${checked}
-              onchange="toggleDevSkill('${sk.name.replace(/'/g, '\\'')}', this)" />
-            <div class="devskill-info">
-              <div class="devskill-name">
-                ${sk.name}
-                <span class="devskill-class-badge">${sk.classLabel}</span>
-              </div>
-              <div class="devskill-desc">${sk.desc}</div>
-            </div>
-          </label>`;
-      }).join('')}
-    </div>
-  `).join('');
-
+  const frag = document.createDocumentFragment();
+  Object.entries(byClass).forEach(([cls, skills]) => {
+    const group = document.createElement('div');
+    group.className = 'devskill-group';
+    group.innerHTML = `<div class="devskill-group-title">🏷 ${skills[0].classLabel}</div>`;
+    skills.forEach(sk => {
+      const checked = selectedDevSkills.includes(sk.name);
+      const label = document.createElement('label');
+      label.className = `devskill-row${checked ? ' devskill-selected' : ''}`;
+      label.id = `dsl-${sk.name.replace(/\s/g,'-')}`;
+      // Класс персонажа указан в badge рядом с именем скилла
+      label.innerHTML = `
+        <input type="checkbox" class="devskill-cb" value="${sk.name}" ${checked ? 'checked' : ''} />
+        <div class="devskill-info">
+          <div class="devskill-name">
+            ${sk.name}
+            <span class="devskill-class-badge">${sk.classLabel}</span>
+          </div>
+          <div class="devskill-desc">${sk.desc}</div>
+        </div>`;
+      label.querySelector('input').addEventListener('change', function() {
+        toggleDevSkill(sk.name, this);
+      });
+      group.appendChild(label);
+    });
+    frag.appendChild(group);
+  });
+  c.innerHTML = '';
+  c.appendChild(frag);
   refreshDevSkillCount();
 }
 
@@ -469,8 +447,7 @@ function toggleDevSkill(name, cb) {
     selectedDevSkills = selectedDevSkills.filter(n => n !== name);
   }
   const key = name.replace(/\s/g,'-');
-  const lbl = document.getElementById(`dsl-${key}`);
-  if (lbl) lbl.classList.toggle('devskill-selected', cb.checked);
+  document.getElementById(`dsl-${key}`)?.classList.toggle('devskill-selected', cb.checked);
   refreshDevSkillCount();
 }
 
@@ -480,13 +457,11 @@ function refreshDevSkillCount() {
 }
 
 // ======= DICE ROLLER (step 5) =======
-let rollHistoryLog = [];
-
 function rollDice(sides) {
   if (!validateDiceCount()) return;
   const count = parseInt(document.getElementById('dice-count').value);
   const results = Array.from({length: count}, () => Math.ceil(Math.random() * sides));
-  const total = results.reduce((a,b)=>a+b,0);
+  const total = results.reduce((a,b) => a+b, 0);
   const label = count > 1
     ? `${count}d${sides}: [${results.join(', ')}] = ${total}`
     : `d${sides}: ${total}`;
@@ -512,7 +487,6 @@ function buildSummary() {
   const origin  = v('char-origin');
   const k1      = v('char-kit1');
   const k2      = v('char-kit2');
-
   const STR = abilityValues.STR, WIL = abilityValues.WIL,
         INT = abilityValues.INT, DEX = abilityValues.DEX;
   const HP       = 10 + STR + WIL;
@@ -521,32 +495,25 @@ function buildSummary() {
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
 
-  const mods = {};
-  ABILITIES.forEach(ab => { mods[ab] = AB_MOD[abilityValues[ab]] ?? 0; });
-
   const abRows = ABILITIES.map(ab => {
-    const m = mods[ab];
-    const mStr = `${m >= 0 ? '+' : ''}${m}`;
-    return `
-      <div class="s-row s-row-rollable" onclick="openPopup('${ab}', null)" title="Бросок ${AB_FULL[ab]}">
-        <span class="s-label">${AB_FULL[ab]} (${ab})</span>
-        <span class="s-value">${abilityValues[ab]} (${mStr}) <span class="roll-hint">🎲</span></span>
-      </div>`;
+    const m = AB_MOD[abilityValues[ab]] ?? 0;
+    return `<div class="s-row s-row-rollable" onclick="openPopup('${ab}', null)" title="Бросок ${AB_FULL[ab]}">
+      <span class="s-label">${AB_FULL[ab]} (${ab})</span>
+      <span class="s-value">${abilityValues[ab]} (${m >= 0 ? '+' : ''}${m}) <span class="roll-hint">🎲</span></span>
+    </div>`;
   }).join('');
 
-  const skillRows = getSkillLevels().filter(s => s.bonus !== null).map(s => {
-    const lvl = ['Необучен','Обучен','Эксперт','Мастер'][s.bonus/2] || 'Необучен';
-    return `<div class="s-row"><span class="s-label">${s.name}</span><span class="s-value">${lvl} (+${s.bonus})</span></div>`;
-  }).join('') || '<div class="s-row"><span class="s-label">—</span></div>';
+  const skillRows = getSkillLevels().filter(s => s.bonus !== null).map(s =>
+    `<div class="s-row"><span class="s-label">${s.name}</span><span class="s-value">${SKILL_LEVEL_NAMES[s.bonus] || 'Необучен'} (+${s.bonus})</span></div>`
+  ).join('') || '<div class="s-row"><span class="s-label">—</span></div>';
 
   const devRows = selectedDevSkills.length
     ? selectedDevSkills.map(name => {
         const sk = DEV_SKILLS.find(d => d.name === name);
-        return sk ? `
-          <div class="s-row">
-            <span class="s-label">${sk.name} <span class="devskill-class-badge">${sk.classLabel}</span></span>
-            <span class="s-value s-value-desc">${sk.desc}</span>
-          </div>` : '';
+        return sk ? `<div class="s-row">
+          <span class="s-label">${sk.name} <span class="devskill-class-badge">${sk.classLabel}</span></span>
+          <span class="s-value s-value-desc">${sk.desc}</span>
+        </div>` : '';
       }).join('')
     : '<div class="s-row"><span class="s-label">—</span></div>';
 
@@ -561,8 +528,7 @@ function buildSummary() {
     <div class="s-section">Навыки</div>
     ${skillRows}
     <div class="s-section">Скиллы развития</div>
-    ${devRows}
-  `;
+    ${devRows}`;
 
   document.getElementById('derived-stats').innerHTML = `
     <div class="derived-item"><div class="derived-label">HP</div><div class="derived-val">${HP}</div></div>
@@ -570,8 +536,7 @@ function buildSummary() {
     <div class="derived-item"><div class="derived-label">DEF</div><div class="derived-val">${DEF}</div></div>
     <div class="derived-item"><div class="derived-label">HUMANITY</div><div class="derived-val">${HUMANITY}</div></div>
     <div class="derived-item"><div class="derived-label">IMPLANT LIM</div><div class="derived-val">${IMPL_LIM}</div></div>
-    <div class="derived-item"><div class="derived-label">RAM</div><div class="derived-val">—</div></div>
-  `;
+    <div class="derived-item"><div class="derived-label">RAM</div><div class="derived-val">—</div></div>`;
 
   validateBuild();
 }
@@ -585,7 +550,6 @@ function validateBuild() {
   if (levels.filter(s => s.bonus === 2).length > 5) errors.push('❌ Обученных навыков > 5');
   if (levels.filter(s => s.bonus === 4).length > 1) errors.push('❌ Навыков Эксперт > 1');
   if (levels.filter(s => s.bonus === 6).length > 0) errors.push('❌ Уровень Мастер недоступен');
-
   const errEl = document.getElementById('validation-errors');
   const okEl  = document.getElementById('validation-ok');
   if (errors.length) {
@@ -598,7 +562,7 @@ function validateBuild() {
   }
 }
 
-// ======= SAVE / LOAD / EXPORT / IMPORT =======
+// ======= SAVE =======
 function saveCharacter() {
   const char = {
     name: v('char-name'), concept: v('char-concept'),
@@ -614,7 +578,7 @@ function saveCharacter() {
   nextStep(7);
 }
 
-// ======= SAVED LIST (step 7) — строки =======
+// ======= SAVED LIST (step 7) =======
 function loadSaved() {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const list  = document.getElementById('saved-list');
@@ -622,8 +586,12 @@ function loadSaved() {
     list.innerHTML = '<p style="color:#446688">Нет сохранённых персонажей</p>';
     return;
   }
-  list.innerHTML = saved.map((c, i) => `
-    <div class="char-list-row" onclick="openCharSheet(${i})">
+  const frag = document.createDocumentFragment();
+  saved.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'char-list-row';
+    row.onclick = () => openCharSheet(i);
+    row.innerHTML = `
       <div class="char-list-info">
         <span class="char-list-name">${c.name}</span>
         ${c.concept ? `<span class="char-list-concept">${c.concept}</span>` : ''}
@@ -631,14 +599,20 @@ function loadSaved() {
         <span class="char-list-date">${new Date(c.createdAt).toLocaleDateString('ru-RU')}</span>
       </div>
       <div class="char-list-actions">
-        <button class="btn-delete" onclick="event.stopPropagation(); deleteChar(${i})">🗑</button>
+        <button class="btn-delete">🗑</button>
         <span class="char-list-arrow">›</span>
-      </div>
-    </div>
-  `).join('');
+      </div>`;
+    row.querySelector('.btn-delete').addEventListener('click', e => {
+      e.stopPropagation();
+      deleteChar(i);
+    });
+    frag.appendChild(row);
+  });
+  list.innerHTML = '';
+  list.appendChild(frag);
 }
 
-// ======= CHARACTER SHEET SUBPAGE (step 8) =======
+// ======= CHARACTER SHEET (step 8 — подстраница) =======
 function openCharSheet(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
@@ -653,13 +627,6 @@ function openCharSheet(charIndex) {
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
 
-  const devSkillNames = c.devSkills || [];
-  const specializations = devSkillNames.map(name => {
-    const sk = DEV_SKILLS.find(d => d.name === name);
-    return sk ? sk.classLabel : null;
-  }).filter(Boolean);
-  const uniqueSpecs = [...new Set(specializations)];
-
   const derivedHtml = `
     <div class="derived-stats-sheet">
       <div class="derived-item"><div class="derived-label">HP</div><div class="derived-val">${HP}</div></div>
@@ -667,63 +634,40 @@ function openCharSheet(charIndex) {
       <div class="derived-item"><div class="derived-label">DEF</div><div class="derived-val">${DEF}</div></div>
       <div class="derived-item"><div class="derived-label">HUMANITY</div><div class="derived-val">${HUMANITY}</div></div>
       <div class="derived-item"><div class="derived-label">IMPLANT LIM</div><div class="derived-val">${IMPL_LIM}</div></div>
-    </div>
-  `;
+    </div>`;
 
   const abHtml = ABILITIES.map(ab => {
     const val = abs[ab] ?? 3;
     const mod = AB_MOD[val] ?? 0;
     const mStr = mod >= 0 ? `+${mod}` : `${mod}`;
-    return `
-      <div class="sheet-row sheet-row-rollable" onclick="openPopupFromSaved('${ab}', ${charIndex})">
-        <span class="sheet-label">${AB_FULL[ab]} <span class="sheet-ab-key">${ab}</span></span>
-        <span class="sheet-value">${val} <span class="sheet-mod">(${mStr})</span> <span class="roll-hint">🎲</span></span>
-      </div>`;
+    return `<div class="sheet-row sheet-row-rollable" onclick="openPopupFromSaved('${ab}', ${charIndex})">
+      <span class="sheet-label">${AB_FULL[ab]} <span class="sheet-ab-key">${ab}</span></span>
+      <span class="sheet-value">${val} <span class="sheet-mod">(${mStr})</span> <span class="roll-hint">🎲</span></span>
+    </div>`;
   }).join('');
 
-  const skills = c.skills || [];
-  const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
-  const skillsHtml = skills.length
-    ? skills.map(s => `
-        <div class="sheet-row">
-          <span class="sheet-label">${s.name} <span class="sheet-base">${s.base}</span></span>
-          <span class="sheet-value">${SKILL_LEVEL_NAMES[s.bonus]||'—'} <span class="sheet-bonus">(+${s.bonus})</span></span>
-        </div>`).join('')
-    : '<div class="sheet-row"><span class="sheet-label">—</span></div>';
-
-  const devSkillsHtml = devSkillNames.length
-    ? devSkillNames.map(name => {
-        const sk = DEV_SKILLS.find(d => d.name === name);
-        if (!sk) return '';
-        return `
-          <div class="sheet-devskill-row">
-            <div class="sheet-devskill-header">
-              <span class="sheet-devskill-name">${sk.name}</span>
-              <span class="sheet-devskill-class">${sk.classLabel}</span>
-            </div>
-            <div class="sheet-devskill-desc">${sk.desc}</div>
-          </div>`;
-      }).join('')
-    : '<div class="sheet-row"><span class="sheet-label">—</span></div>';
+  // Навыки и Dev Skills — кликабельные ссылки на подстраницы
+  const skillCount = (c.skills || []).filter(s => s.bonus !== null).length;
+  const devCount   = (c.devSkills || []).length;
 
   document.getElementById('charsheet-content').innerHTML = `
     <div class="sheet-header">
       <div class="sheet-name">${c.name}</div>
       ${c.concept ? `<div class="sheet-concept">${c.concept}</div>` : ''}
       <div class="sheet-meta">${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1} + ${KIT_LABELS[c.k2]||c.k2}</div>
-      ${uniqueSpecs.length ? `<div class="sheet-spec">Специализация: ${uniqueSpecs.join(', ')}</div>` : ''}
     </div>
     ${derivedHtml}
     <div class="sheet-section">Характеристики <span class="section-hint">— нажми для броска</span></div>
     ${abHtml}
-    <div class="sheet-section subpage-section-link" onclick="openSkillsSubpage(${charIndex})">
-      Навыки <span class="section-arrow">›</span>
+    <div class="sheet-section subpage-section-link" id="link-skills-sub">
+      Навыки <span class="subpage-badge">${skillCount}</span><span class="section-arrow">›</span>
     </div>
-    <div class="sheet-section subpage-section-link" onclick="openDevSkillsSubpage(${charIndex})">
-      Скиллы развития <span class="section-arrow">›</span>
-    </div>
-  `;
+    <div class="sheet-section subpage-section-link" id="link-devskills-sub">
+      Скиллы развития <span class="subpage-badge">${devCount}</span><span class="section-arrow">›</span>
+    </div>`;
 
+  document.getElementById('link-skills-sub').onclick = () => openSkillsSubpage(charIndex);
+  document.getElementById('link-devskills-sub').onclick = () => openDevSkillsSubpage(charIndex);
   document.getElementById('charsheet-content').dataset.charIndex = charIndex;
   showStep(8);
 }
@@ -733,10 +677,7 @@ function openSkillsSubpage(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
   if (!c) return;
-
-  const skills = c.skills || [];
-  const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
-
+  const skills = (c.skills || []).filter(s => s.bonus !== null);
   const rows = skills.length
     ? skills.map(s => `
         <div class="subpage-row">
@@ -747,35 +688,31 @@ function openSkillsSubpage(charIndex) {
           <div class="subpage-base">${s.base}</div>
         </div>`).join('')
     : '<div class="subpage-empty">Нет выбранных навыков</div>';
-
   document.getElementById('skills-sub-content').innerHTML = rows;
   document.getElementById('skills-sub-back').onclick = () => openCharSheet(charIndex);
   showStep(9);
 }
 
 // ======= DEV SKILLS SUBPAGE (step 10) =======
+// Подстраница показывает выбранные скиллы с именем класса в описании
 function openDevSkillsSubpage(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
   if (!c) return;
-
   const devSkillNames = c.devSkills || [];
-
   const rows = devSkillNames.length
     ? devSkillNames.map(name => {
         const sk = DEV_SKILLS.find(d => d.name === name);
         if (!sk) return '';
-        return `
-          <div class="subpage-devskill-row">
-            <div class="subpage-devskill-header">
-              <span class="subpage-devskill-name">${sk.name}</span>
-              <span class="subpage-devskill-class">${sk.classLabel}</span>
-            </div>
-            <div class="subpage-devskill-desc">${sk.desc}</div>
-          </div>`;
+        return `<div class="subpage-devskill-row">
+          <div class="subpage-devskill-header">
+            <span class="subpage-devskill-name">${sk.name}</span>
+            <span class="subpage-devskill-class">${sk.classLabel}</span>
+          </div>
+          <div class="subpage-devskill-desc">${sk.desc}</div>
+        </div>`;
       }).join('')
     : '<div class="subpage-empty">Нет выбранных скиллов развития</div>';
-
   document.getElementById('devskills-sub-content').innerHTML = rows;
   document.getElementById('devskills-sub-back').onclick = () => openCharSheet(charIndex);
   showStep(10);
@@ -790,7 +727,7 @@ function openPopupFromSaved(ab, charIndex) {
 
 function deleteChar(i) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
-  saved.splice(i,1);
+  saved.splice(i, 1);
   localStorage.setItem('cp_characters', JSON.stringify(saved));
   loadSaved();
 }
