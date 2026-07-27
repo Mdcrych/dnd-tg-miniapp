@@ -109,22 +109,53 @@ const ORIGIN_LABELS = {
 };
 const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
 
+// ======= LEVEL PROGRESSION (Rulebook §8.2 + §20.3) =======
+const LEVEL_PROGRESSION = [
+  { level: 1,  tier: 'I',   dp: 0,  dpTotal: 0,  access: 'Базовые скилы' },
+  { level: 2,  tier: 'II',  dp: 2,  dpTotal: 2,  access: 'Продвинутые скилы Tier II' },
+  { level: 3,  tier: 'II',  dp: 2,  dpTotal: 4,  access: 'Первые гибридные сборки' },
+  { level: 4,  tier: 'II',  dp: 2,  dpTotal: 6,  access: 'Экзотичные скилы' },
+  { level: 5,  tier: 'II',  dp: 3,  dpTotal: 9,  access: 'Глубокая специализация' },
+  { level: 6,  tier: 'III', dp: 3,  dpTotal: 12, access: 'Престижные скилы Tier III' },
+  { level: 7,  tier: 'III', dp: 3,  dpTotal: 15, access: 'Второй сильный трек' },
+  { level: 8,  tier: 'III', dp: 3,  dpTotal: 18, access: 'Чёрные ветви и жёсткие обходы' },
+  { level: 9,  tier: 'III', dp: 3,  dpTotal: 21, access: 'Культовые скилы' },
+  { level: 10, tier: 'III', dp: 3,  dpTotal: 24, access: 'Легендарные комбинации' },
+];
+
+const DP_COSTS = [
+  { name: 'Базовый скил развития',      cost: 2 },
+  { name: 'Продвинутый скил развития',  cost: 3 },
+  { name: 'Глубокий скил развития',     cost: 4 },
+  { name: 'Экзотичный скил развития',   cost: 5 },
+  { name: 'Культовый скил развития',    cost: 6 },
+  { name: 'Престижный скил развития',   cost: 7 },
+  { name: 'Новый обученный навык',      cost: 2 },
+  { name: 'Навык до Эксперта',          cost: 3 },
+  { name: 'Навык до Мастера',           cost: 5 },
+  { name: 'Новая специализация',        cost: 2 },
+  { name: 'Улучшенный имплант',         cost: 3 },
+  { name: 'Экзотичный имплант',         cost: 5 },
+  { name: 'Улучшенный дрон',            cost: 3 },
+  { name: 'Экзотичный дрон',            cost: 5 },
+];
+
 // ======= STATE =======
 let abilityValues = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
 let TOTAL_POINTS = 6;
 let selectedDevSkills = [];
-let currentPopupAb = null;
-let currentPopupAbValues = null;
+let currentCharLevel = 1;
+let currentCharDP = 0;
 // Стек навигации для кнопки «Назад» на подстраницах
 let navStack = [];
 
 // ======= STEP NAVIGATION =======
-// Steps: 1=basic, 2=abilities, 3=skills, 4=devskills, 5=dice, 6=summary, 7=saved
-// Subpages: 8=char-sheet, 9=skills-sub, 10=devskills-sub
+// Steps: 1=basic, 2=abilities, 3=skills, 4=devskills, 5=summary, 6=saved
+// Subpages: 7=char-sheet, 8=skills-sub, 9=devskills-sub, 10=level
 const STEP_IDS = [
   'step-basic','step-abilities','step-skills','step-devskills',
-  'step-dice','step-summary','step-saved','step-charsheet',
-  'step-skills-sub','step-devskills-sub'
+  'step-summary','step-saved','step-charsheet',
+  'step-skills-sub','step-devskills-sub','step-level'
 ];
 
 function showStep(n) {
@@ -136,8 +167,8 @@ function showStep(n) {
 function nextStep(n) {
   if (!validateStep(n - 1)) return;
   if (n === 4) initDevSkills();
-  if (n === 6) buildSummary();
-  if (n === 7) loadSaved();
+  if (n === 5) buildSummary();
+  if (n === 6) loadSaved();
   showStep(n);
 }
 function prevStep(n) { showStep(n); }
@@ -162,23 +193,20 @@ function err(msg) { alert(msg); return false; }
 // ======= ABILITY SCORES (step 2) =======
 function initAbilityScores() {
   const c = document.getElementById('ability-scores');
-  // Используем DocumentFragment для быстрой вставки
   const frag = document.createDocumentFragment();
   ABILITIES.forEach(ab => {
     const div = document.createElement('div');
     div.className = 'ability-block';
     div.id = `ab-block-${ab}`;
-    div.onclick = () => openPopup(ab, null);
     div.innerHTML = `
       <div class="ability-tag">${ab}</div>
       <div class="ability-name-full">${AB_FULL[ab]}</div>
       <div class="ability-controls">
-        <button class="ab-btn" onclick="event.stopPropagation(); changeAb('${ab}',-1)">−</button>
+        <button class="ab-btn" onclick="changeAb('${ab}',-1)">−</button>
         <span class="ab-val" id="ab-val-${ab}">${abilityValues[ab]}</span>
-        <button class="ab-btn" onclick="event.stopPropagation(); changeAb('${ab}',+1)">+</button>
+        <button class="ab-btn" onclick="changeAb('${ab}',+1)">+</button>
       </div>
-      <div class="ab-mod" id="ab-mod-${ab}"></div>
-      <div class="dice-hint">нажми → бросок проверки</div>`;
+      <div class="ab-mod" id="ab-mod-${ab}"></div>`;
     frag.appendChild(div);
   });
   c.innerHTML = '';
@@ -190,21 +218,40 @@ function initAbilityScores() {
 function changeAb(ab, delta) {
   const cur = abilityValues[ab], next = cur + delta;
   if (next < 1 || next > 5) return;
-  const cost = delta > 0 ? pointCost(cur, next) : -pointCost(next, cur);
-  const rem = getRemainingPoints();
-  if (delta > 0 && cost > rem) { err(`Недостаточно очков! Нужно ${cost}, осталось ${rem}`); return; }
+
+  if (delta > 0) {
+    // Повышение: считаем стоимость
+    const cost = pointCost(cur, next);
+    const rem = getRemainingPoints();
+    if (cost > rem) { err(`Недостаточно очков! Нужно ${cost}, осталось ${rem}`); return; }
+  }
+  // Понижение ниже 3: возвращаем 1 очко за каждый шаг
+  // Понижение от 3 и выше: возвращаем обычную стоимость
+
   abilityValues[ab] = next;
   refreshAb(ab);
   refreshPoints();
 }
 
+// Стоимость повышения от from до to (оба >= 3)
+// При понижении ниже 3 каждый шаг даёт +1 очко (pointCost не используется)
 function pointCost(from, to) {
   let c = 0;
   for (let i = from; i < to; i++) c += (i >= 4 ? 2 : 1);
   return c;
 }
+
+// Суммарно потрачено очков с учётом возвратов при значениях < 3
 function totalSpent() {
-  return ABILITIES.reduce((s, ab) => s + pointCost(3, abilityValues[ab]), 0);
+  return ABILITIES.reduce((s, ab) => {
+    const val = abilityValues[ab];
+    if (val >= 3) {
+      return s + pointCost(3, val);
+    } else {
+      // val < 3: каждый шаг ниже 3 возвращает 1 очко
+      return s - (3 - val);
+    }
+  }, 0);
 }
 function getRemainingPoints() { return TOTAL_POINTS - totalSpent(); }
 
@@ -227,34 +274,6 @@ function validateAbilities() {
   return errs;
 }
 
-// ======= POPUP (Ability Check) =======
-function openPopup(ab, abValues) {
-  currentPopupAb = ab;
-  currentPopupAbValues = abValues || abilityValues;
-  const val = currentPopupAbValues[ab] ?? 3;
-  const mod = AB_MOD[val] ?? 0;
-  const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
-  document.getElementById('popup-title').textContent = `Бросок: ${AB_FULL[ab]} (${ab})`;
-  document.getElementById('popup-formula').textContent = `1d20 ${modStr} (мод) + навык + ситуатив`;
-  document.getElementById('popup-result').classList.add('hidden');
-  clearPopupErrors();
-  const advNormal = document.querySelector('input[name=adv][value=normal]');
-  if (advNormal) advNormal.checked = true;
-  document.getElementById('popup-dc').value = '13';
-  document.getElementById('popup-skill').value = '0';
-  document.getElementById('ability-roll-popup').classList.remove('hidden');
-  document.querySelectorAll('.ability-block').forEach(b => b.classList.remove('active-popup'));
-  document.getElementById(`ab-block-${ab}`)?.classList.add('active-popup');
-}
-
-function closePopup() {
-  document.getElementById('ability-roll-popup').classList.add('hidden');
-  document.querySelectorAll('.ability-block').forEach(b => b.classList.remove('active-popup'));
-  currentPopupAb = null;
-  currentPopupAbValues = null;
-  clearPopupErrors();
-}
-
 // ======= INPUT VALIDATION HELPERS =======
 function showFieldError(fieldId, msg) {
   const el = document.getElementById(fieldId);
@@ -274,82 +293,6 @@ function clearFieldError(fieldId) {
   el.classList.remove('input-error');
   el.parentElement?.querySelector('.field-error-hint')?.remove();
 }
-function clearPopupErrors() {
-  ['popup-dc','popup-skill','dice-count'].forEach(clearFieldError);
-}
-
-function validatePopupInputs() {
-  let valid = true;
-  clearPopupErrors();
-  const dc = parseInt(document.getElementById('popup-dc')?.value);
-  if (isNaN(dc) || dc < 1 || dc > 30) { showFieldError('popup-dc', 'DC: число от 1 до 30'); valid = false; }
-  const skill = parseInt(document.getElementById('popup-skill')?.value);
-  if (![0, 2, 4, 6].includes(skill)) { showFieldError('popup-skill', 'Выберите уровень навыка'); valid = false; }
-  if (!document.querySelector('input[name=adv]:checked')) valid = false;
-  return valid;
-}
-
-function validateDiceCount() {
-  clearFieldError('dice-count');
-  const val = parseInt(document.getElementById('dice-count')?.value);
-  if (isNaN(val) || val < 1 || val > 20) {
-    showFieldError('dice-count', 'Кол-во кубиков: от 1 до 20');
-    return false;
-  }
-  return true;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('popup-dc')?.addEventListener('input', () => {
-    const val = parseInt(document.getElementById('popup-dc').value);
-    if (!isNaN(val) && val >= 1 && val <= 30) clearFieldError('popup-dc');
-    else showFieldError('popup-dc', 'DC: число от 1 до 30');
-  });
-  document.getElementById('popup-skill')?.addEventListener('change', () => clearFieldError('popup-skill'));
-  document.getElementById('dice-count')?.addEventListener('input', () => {
-    const val = parseInt(document.getElementById('dice-count').value);
-    if (!isNaN(val) && val >= 1 && val <= 20) clearFieldError('dice-count');
-    else showFieldError('dice-count', 'От 1 до 20');
-  });
-});
-
-// ======= EXECUTE ROLL =======
-function executeRoll() {
-  if (!validatePopupInputs()) return;
-  const ab = currentPopupAb;
-  const abVals = currentPopupAbValues || abilityValues;
-  if (!ab) return;
-  const val = abVals[ab] ?? 3;
-  const mod = AB_MOD[val] ?? 0;
-  const skillBonus = parseInt(document.getElementById('popup-skill').value) || 0;
-  const dc   = parseInt(document.getElementById('popup-dc').value) || 13;
-  const adv  = document.querySelector('input[name=adv]:checked')?.value || 'normal';
-  let d1 = roll20(), d2 = roll20(), chosen, rolls;
-  if (adv === 'advantage')      { chosen = Math.max(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
-  else if (adv === 'disadvantage') { chosen = Math.min(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
-  else                              { chosen = d1; rolls = `${d1}`; }
-  const total = chosen + mod + skillBonus;
-  const isCritSuccess = chosen === 20;
-  const isCritFail    = chosen === 1;
-  const diff = total - dc;
-  let verdict, cls;
-  if (isCritFail)         { verdict = '💀 Крит. провал! Осложнение.'; cls = 'crit-fail'; }
-  else if (isCritSuccess) { verdict = '⚡ Крит. успех!';              cls = 'crit-success'; }
-  else if (diff >= 0)     { verdict = `✅ Успех! (+${diff} к DC)`;    cls = 'success'; }
-  else if (diff >= -2)    { verdict = `⚠️ Ценой? (не хв. ${Math.abs(diff)})`; cls = 'close'; }
-  else                    { verdict = `❌ Провал (хв. ${Math.abs(diff)})`;     cls = 'fail'; }
-  const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
-  const sklStr = skillBonus > 0 ? ` + ${skillBonus}` : '';
-  const resEl = document.getElementById('popup-result');
-  resEl.classList.remove('hidden');
-  resEl.innerHTML = `
-    <div class="res-dice">d20: ${rolls}</div>
-    <div class="res-total">${chosen} (d20) ${modStr} (${AB_FULL[ab]})${sklStr} = <strong>${total}</strong> vs DC ${dc}</div>
-    <div class="res-verdict ${cls}">${verdict}</div>`;
-  addHistory(`${ab}: d20=${chosen} ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess?'КРИТ!':isCritFail?'ФЕЙЛ!':diff>=0?'Успех':'Провал'}`);
-}
-
-function roll20() { return Math.ceil(Math.random() * 20); }
 
 // ======= SKILLS (step 3) =======
 function initSkills() {
@@ -393,8 +336,6 @@ function validateSkills() {
 }
 
 // ======= DEV SKILLS (step 4) =======
-// Скиллы развития — отдельная подстраница с группировкой по классам.
-// Выбрать можно любой скилл (до 2), независимо от класса персонажа.
 function initDevSkills() {
   const c = document.getElementById('devskills-container');
   const byClass = {};
@@ -413,7 +354,6 @@ function initDevSkills() {
       const label = document.createElement('label');
       label.className = `devskill-row${checked ? ' devskill-selected' : ''}`;
       label.id = `dsl-${sk.name.replace(/\s/g,'-')}`;
-      // Класс персонажа указан в badge рядом с именем скилла
       label.innerHTML = `
         <input type="checkbox" class="devskill-cb" value="${sk.name}" ${checked ? 'checked' : ''} />
         <div class="devskill-info">
@@ -456,31 +396,7 @@ function refreshDevSkillCount() {
   if (el) el.textContent = `Выбрано: ${selectedDevSkills.length} / 2`;
 }
 
-// ======= DICE ROLLER (step 5) =======
-function rollDice(sides) {
-  if (!validateDiceCount()) return;
-  const count = parseInt(document.getElementById('dice-count').value);
-  const results = Array.from({length: count}, () => Math.ceil(Math.random() * sides));
-  const total = results.reduce((a,b) => a+b, 0);
-  const label = count > 1
-    ? `${count}d${sides}: [${results.join(', ')}] = ${total}`
-    : `d${sides}: ${total}`;
-  const resultEl = document.getElementById('roll-result');
-  resultEl.classList.remove('hidden');
-  resultEl.textContent = label;
-  addHistory(label);
-}
-
-function addHistory(text) {
-  const hist = document.getElementById('roll-history');
-  if (!hist) return;
-  const p = document.createElement('p');
-  p.textContent = text;
-  hist.prepend(p);
-  if (hist.children.length > 25) hist.lastChild.remove();
-}
-
-// ======= SUMMARY (step 6) =======
+// ======= SUMMARY (step 5) =======
 function buildSummary() {
   const name    = v('char-name');
   const concept = v('char-concept');
@@ -497,9 +413,9 @@ function buildSummary() {
 
   const abRows = ABILITIES.map(ab => {
     const m = AB_MOD[abilityValues[ab]] ?? 0;
-    return `<div class="s-row s-row-rollable" onclick="openPopup('${ab}', null)" title="Бросок ${AB_FULL[ab]}">
+    return `<div class="s-row">
       <span class="s-label">${AB_FULL[ab]} (${ab})</span>
-      <span class="s-value">${abilityValues[ab]} (${m >= 0 ? '+' : ''}${m}) <span class="roll-hint">🎲</span></span>
+      <span class="s-value">${abilityValues[ab]} (${m >= 0 ? '+' : ''}${m})</span>
     </div>`;
   }).join('');
 
@@ -523,7 +439,7 @@ function buildSummary() {
     <div class="s-row"><span class="s-label">Концепт</span><span class="s-value">${concept || '—'}</span></div>
     <div class="s-row"><span class="s-label">Происхождение</span><span class="s-value">${ORIGIN_LABELS[origin]||origin}</span></div>
     <div class="s-row"><span class="s-label">Пакеты</span><span class="s-value">${KIT_LABELS[k1]||k1} + ${KIT_LABELS[k2]||k2}</span></div>
-    <div class="s-section">Характеристики <span class="section-hint">— нажми для броска</span></div>
+    <div class="s-section">Характеристики</div>
     ${abRows}
     <div class="s-section">Навыки</div>
     ${skillRows}
@@ -570,15 +486,17 @@ function saveCharacter() {
     abilities: { ...abilityValues },
     skills: getSkillLevels().filter(s => s.bonus !== null),
     devSkills: [...selectedDevSkills],
+    level: 1,
+    dp: 0,
     createdAt: Date.now()
   };
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   saved.push(char);
   localStorage.setItem('cp_characters', JSON.stringify(saved));
-  nextStep(7);
+  nextStep(6);
 }
 
-// ======= SAVED LIST (step 7) =======
+// ======= SAVED LIST (step 6) =======
 function loadSaved() {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const list  = document.getElementById('saved-list');
@@ -588,6 +506,8 @@ function loadSaved() {
   }
   const frag = document.createDocumentFragment();
   saved.forEach((c, i) => {
+    const level = c.level || 1;
+    const dp = c.dp || 0;
     const row = document.createElement('div');
     row.className = 'char-list-row';
     row.onclick = () => openCharSheet(i);
@@ -596,6 +516,7 @@ function loadSaved() {
         <span class="char-list-name">${c.name}</span>
         ${c.concept ? `<span class="char-list-concept">${c.concept}</span>` : ''}
         <span class="char-list-meta">${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1}</span>
+        <span class="char-list-meta">Уровень ${level} · DP: ${dp}</span>
         <span class="char-list-date">${new Date(c.createdAt).toLocaleDateString('ru-RU')}</span>
       </div>
       <div class="char-list-actions">
@@ -612,7 +533,7 @@ function loadSaved() {
   list.appendChild(frag);
 }
 
-// ======= CHARACTER SHEET (step 8 — подстраница) =======
+// ======= CHARACTER SHEET (step 7) =======
 function openCharSheet(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
@@ -626,6 +547,10 @@ function openCharSheet(charIndex) {
   const DEF      = 10 + (AB_MOD[DEX] ?? 0);
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
+  const level    = c.level || 1;
+  const dp       = c.dp || 0;
+  const lvlInfo  = LEVEL_PROGRESSION.find(l => l.level === level) || LEVEL_PROGRESSION[0];
+  const nextLvl  = LEVEL_PROGRESSION.find(l => l.level === level + 1);
 
   const derivedHtml = `
     <div class="derived-stats-sheet">
@@ -640,15 +565,38 @@ function openCharSheet(charIndex) {
     const val = abs[ab] ?? 3;
     const mod = AB_MOD[val] ?? 0;
     const mStr = mod >= 0 ? `+${mod}` : `${mod}`;
-    return `<div class="sheet-row sheet-row-rollable" onclick="openPopupFromSaved('${ab}', ${charIndex})">
+    return `<div class="sheet-row">
       <span class="sheet-label">${AB_FULL[ab]} <span class="sheet-ab-key">${ab}</span></span>
-      <span class="sheet-value">${val} <span class="sheet-mod">(${mStr})</span> <span class="roll-hint">🎲</span></span>
+      <span class="sheet-value">${val} <span class="sheet-mod">(${mStr})</span></span>
     </div>`;
   }).join('');
 
-  // Навыки и Dev Skills — кликабельные ссылки на подстраницы
   const skillCount = (c.skills || []).filter(s => s.bonus !== null).length;
   const devCount   = (c.devSkills || []).length;
+
+  // Управление уровнем и DP
+  const levelHtml = `
+    <div class="level-block">
+      <div class="level-row">
+        <span class="level-label">Уровень</span>
+        <div class="level-controls">
+          <button class="ab-btn" onclick="changeCharLevel(${charIndex}, -1)">−</button>
+          <span class="level-val">${level}</span>
+          <button class="ab-btn" onclick="changeCharLevel(${charIndex}, +1)">+</button>
+        </div>
+      </div>
+      <div class="level-row">
+        <span class="level-label">DP (Development Points)</span>
+        <div class="level-controls">
+          <button class="ab-btn" onclick="changeCharDP(${charIndex}, -1)">−</button>
+          <span class="level-val">${dp}</span>
+          <button class="ab-btn" onclick="changeCharDP(${charIndex}, +1)">+</button>
+        </div>
+      </div>
+      <div class="level-access">Tier ${lvlInfo.tier}: ${lvlInfo.access}</div>
+      ${nextLvl ? `<div class="level-next">Следующий уровень (${nextLvl.level}): +${nextLvl.dp} DP → ${nextLvl.access}</div>` : '<div class="level-next">🏆 Максимальный уровень!</div>'}
+      <button class="btn-level-table" onclick="openLevelSubpage(${charIndex})">📈 Таблица прогрессии →</button>
+    </div>`;
 
   document.getElementById('charsheet-content').innerHTML = `
     <div class="sheet-header">
@@ -656,8 +604,9 @@ function openCharSheet(charIndex) {
       ${c.concept ? `<div class="sheet-concept">${c.concept}</div>` : ''}
       <div class="sheet-meta">${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1} + ${KIT_LABELS[c.k2]||c.k2}</div>
     </div>
+    ${levelHtml}
     ${derivedHtml}
-    <div class="sheet-section">Характеристики <span class="section-hint">— нажми для броска</span></div>
+    <div class="sheet-section">Характеристики</div>
     ${abHtml}
     <div class="sheet-section subpage-section-link" id="link-skills-sub">
       Навыки <span class="subpage-badge">${skillCount}</span><span class="section-arrow">›</span>
@@ -669,10 +618,76 @@ function openCharSheet(charIndex) {
   document.getElementById('link-skills-sub').onclick = () => openSkillsSubpage(charIndex);
   document.getElementById('link-devskills-sub').onclick = () => openDevSkillsSubpage(charIndex);
   document.getElementById('charsheet-content').dataset.charIndex = charIndex;
-  showStep(8);
+  showStep(7);
 }
 
-// ======= SKILLS SUBPAGE (step 9) =======
+// ======= LEVEL CONTROLS =======
+function changeCharLevel(charIndex, delta) {
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  const c = saved[charIndex];
+  if (!c) return;
+  const newLevel = Math.max(1, Math.min(10, (c.level || 1) + delta));
+  const lvlInfo = LEVEL_PROGRESSION.find(l => l.level === newLevel);
+  if (delta > 0 && lvlInfo) {
+    c.dp = (c.dp || 0) + lvlInfo.dp;
+  } else if (delta < 0) {
+    const oldLvlInfo = LEVEL_PROGRESSION.find(l => l.level === (c.level || 1));
+    c.dp = Math.max(0, (c.dp || 0) - (oldLvlInfo ? oldLvlInfo.dp : 0));
+  }
+  c.level = newLevel;
+  saved[charIndex] = c;
+  localStorage.setItem('cp_characters', JSON.stringify(saved));
+  openCharSheet(charIndex);
+}
+
+function changeCharDP(charIndex, delta) {
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  const c = saved[charIndex];
+  if (!c) return;
+  c.dp = Math.max(0, (c.dp || 0) + delta);
+  saved[charIndex] = c;
+  localStorage.setItem('cp_characters', JSON.stringify(saved));
+  openCharSheet(charIndex);
+}
+
+// ======= LEVEL SUBPAGE (step 10) =======
+function openLevelSubpage(charIndex) {
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  const c = saved[charIndex];
+  if (!c) return;
+  const currentLevel = c.level || 1;
+
+  const progressionRows = LEVEL_PROGRESSION.map(l => {
+    const isActive = l.level === currentLevel;
+    const isPast = l.level < currentLevel;
+    return `<div class="level-table-row${isActive ? ' level-active' : isPast ? ' level-past' : ''}">
+      <span class="lt-lvl">${isActive ? '▶ ' : ''}Ур. ${l.level}</span>
+      <span class="lt-tier">Tier ${l.tier}</span>
+      <span class="lt-dp">+${l.dp} DP</span>
+      <span class="lt-total">${l.dpTotal} DP всего</span>
+      <span class="lt-access">${l.access}</span>
+    </div>`;
+  }).join('');
+
+  const costsRows = DP_COSTS.map(d =>
+    `<div class="dp-cost-row">
+      <span class="dp-cost-name">${d.name}</span>
+      <span class="dp-cost-val">${d.cost} DP</span>
+    </div>`
+  ).join('');
+
+  document.getElementById('level-content').innerHTML = `
+    <div class="level-subpage-header">Персонаж: <strong>${c.name}</strong> · Уровень ${currentLevel} · DP: ${c.dp || 0}</div>
+    <div class="s-section">Таблица прогрессии</div>
+    <div class="level-table">${progressionRows}</div>
+    <div class="s-section">Стоимость улучшений (DP)</div>
+    <div class="dp-costs-list">${costsRows}</div>`;
+
+  document.getElementById('level-back').onclick = () => openCharSheet(charIndex);
+  showStep(10);
+}
+
+// ======= SKILLS SUBPAGE (step 8) =======
 function openSkillsSubpage(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
@@ -690,11 +705,10 @@ function openSkillsSubpage(charIndex) {
     : '<div class="subpage-empty">Нет выбранных навыков</div>';
   document.getElementById('skills-sub-content').innerHTML = rows;
   document.getElementById('skills-sub-back').onclick = () => openCharSheet(charIndex);
-  showStep(9);
+  showStep(8);
 }
 
-// ======= DEV SKILLS SUBPAGE (step 10) =======
-// Подстраница показывает выбранные скиллы с именем класса в описании
+// ======= DEV SKILLS SUBPAGE (step 9) =======
 function openDevSkillsSubpage(charIndex) {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const c = saved[charIndex];
@@ -715,14 +729,7 @@ function openDevSkillsSubpage(charIndex) {
     : '<div class="subpage-empty">Нет выбранных скиллов развития</div>';
   document.getElementById('devskills-sub-content').innerHTML = rows;
   document.getElementById('devskills-sub-back').onclick = () => openCharSheet(charIndex);
-  showStep(10);
-}
-
-function openPopupFromSaved(ab, charIndex) {
-  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
-  const char  = saved[charIndex];
-  if (!char) return;
-  openPopup(ab, char.abilities);
+  showStep(9);
 }
 
 function deleteChar(i) {

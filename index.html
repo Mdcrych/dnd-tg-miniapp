@@ -84,54 +84,19 @@
     <section id="step-abilities" class="step">
       <h2>Шаг 2: Характеристики</h2>
       <p class="hint">Все характеристики стартуют с 3. Распределите <strong>6 очков</strong>.<br>
-        3→4 = 1 очко &nbsp;|&nbsp; 4→5 = 2 очка &nbsp;|&nbsp; макс. <strong>5</strong>, не более двух на 5.</p>
+        3→4 = 1 очко &nbsp;|&nbsp; 4→5 = 2 очка &nbsp;|&nbsp; макс. <strong>5</strong>, не более двух на 5.<br>
+        <span class="hint-sub">При понижении ниже 3 каждый шаг возвращает +1 очко.</span></p>
       <div id="points-bar">
         Очков осталось: <span id="points-left" class="pts">6</span>
       </div>
       <div id="ability-scores"></div>
-
-      <div id="ability-roll-popup" class="popup hidden">
-        <div class="popup-inner">
-          <div class="popup-title" id="popup-title">Проверка STR</div>
-          <div class="popup-formula" id="popup-formula">1d20 + мод</div>
-          <div class="dc-row">
-            <label>DC:
-              <select id="popup-dc">
-                <option value="8">8 — Очень легко</option>
-                <option value="10">10 — Легко</option>
-                <option value="13" selected>13 — Стандартно</option>
-                <option value="16">16 — Трудно</option>
-                <option value="19">19 — Очень трудно</option>
-                <option value="22">22 — Экстремально</option>
-              </select>
-            </label>
-            <label>Навык:
-              <select id="popup-skill">
-                <option value="0">Необучен (+0)</option>
-                <option value="2">Обучен (+2)</option>
-                <option value="4">Эксперт (+4)</option>
-                <option value="6">Мастер (+6)</option>
-              </select>
-            </label>
-          </div>
-          <div class="adv-row">
-            <label><input type="radio" name="adv" value="normal" checked /> Обычный</label>
-            <label><input type="radio" name="adv" value="advantage" /> Преимущество (2d20 лучший)</label>
-            <label><input type="radio" name="adv" value="disadvantage" /> Помеха (2d20 худший)</label>
-          </div>
-          <button class="btn-roll-check" id="popup-roll-btn" onclick="executeRoll()">🎲 Бросить</button>
-          <div id="popup-result" class="popup-result hidden"></div>
-          <button class="btn-close" onclick="closePopup()">✕ Закрыть</button>
-        </div>
-      </div>
-
       <div class="nav-buttons">
         <button onclick="prevStep(1)">← Назад</button>
         <button onclick="nextStep(3)">Далее →</button>
       </div>
     </section>
 
-    <!-- Step 3: Skills (без специализации) -->
+    <!-- Step 3: Skills -->
     <section id="step-skills" class="step">
       <h2>Шаг 3: Навыки</h2>
       <p class="hint">Выберите <strong>5 навыков Обучен</strong> и <strong>1 Эксперт</strong>.<br>
@@ -156,46 +121,20 @@
       </div>
     </section>
 
-    <!-- Step 5: Dice Roller -->
-    <section id="step-dice" class="step">
-      <h2>Шаг 5: Кубики</h2>
-      <p class="hint">d20 для проверок. d4–d12 для урона.</p>
-      <div class="dice-grid">
-        <button class="dice" onclick="rollDice(4)">d4</button>
-        <button class="dice" onclick="rollDice(6)">d6</button>
-        <button class="dice" onclick="rollDice(8)">d8</button>
-        <button class="dice" onclick="rollDice(10)">d10</button>
-        <button class="dice" onclick="rollDice(12)">d12</button>
-        <button class="dice dice-d20" onclick="rollDice(20)">d20</button>
-      </div>
-      <div id="dice-count-row">
-        <label>Кол-во кубиков:
-          <input id="dice-count" type="number" min="1" max="20" value="1" />
-        </label>
-      </div>
-      <div id="roll-result" class="roll-result hidden"></div>
-      <div class="roll-history-label">История бросков</div>
-      <div id="roll-history" class="roll-history"></div>
-      <div class="nav-buttons">
-        <button onclick="prevStep(4)">← Назад</button>
-        <button onclick="nextStep(6)">Далее →</button>
-      </div>
-    </section>
-
-    <!-- Step 6: Summary & Validation -->
+    <!-- Step 5: Summary & Validation (бывший Step 6) -->
     <section id="step-summary" class="step">
-      <h2>Шаг 6: Лист персонажа</h2>
+      <h2>Шаг 5: Лист персонажа</h2>
       <div id="summary-content"></div>
       <div id="derived-stats"></div>
       <div id="validation-errors" class="errors hidden"></div>
       <div id="validation-ok" class="success hidden">✅ Билд валиден по правилам!</div>
       <div class="nav-buttons">
-        <button onclick="prevStep(5)">← Назад</button>
+        <button onclick="prevStep(4)">← Назад</button>
         <button id="btn-save" class="btn-primary" onclick="saveCharacter()">💾 Сохранить персонажа</button>
       </div>
     </section>
 
-    <!-- Step 7: Saved list -->
+    <!-- Step 6: Saved list (бывший Step 7) -->
     <section id="step-saved" class="step">
       <h2>Сохранённые персонажи</h2>
       <p class="hint">Нажми на персонажа, чтобы открыть полный лист.</p>
@@ -208,16 +147,16 @@
       </div>
     </section>
 
-    <!-- Step 8: Character Sheet subpage -->
+    <!-- Step 7: Character Sheet subpage (бывший Step 8) -->
     <section id="step-charsheet" class="step">
       <h2>Лист персонажа</h2>
       <div id="charsheet-content"></div>
       <div class="nav-buttons">
-        <button onclick="prevStep(7); loadSaved();">← К списку</button>
+        <button onclick="prevStep(6); loadSaved();">← К списку</button>
       </div>
     </section>
 
-    <!-- Step 9: Skills subpage -->
+    <!-- Step 8: Skills subpage (бывший Step 9) -->
     <section id="step-skills-sub" class="step">
       <h2>Навыки</h2>
       <div id="skills-sub-content"></div>
@@ -226,12 +165,21 @@
       </div>
     </section>
 
-    <!-- Step 10: Dev Skills subpage -->
+    <!-- Step 9: Dev Skills subpage (бывший Step 10) -->
     <section id="step-devskills-sub" class="step">
       <h2>Скиллы развития</h2>
       <div id="devskills-sub-content"></div>
       <div class="nav-buttons">
         <button id="devskills-sub-back">← Назад</button>
+      </div>
+    </section>
+
+    <!-- Step 10: Level & Progression subpage -->
+    <section id="step-level" class="step">
+      <h2>Уровень и прогрессия</h2>
+      <div id="level-content"></div>
+      <div class="nav-buttons">
+        <button id="level-back">← Назад</button>
       </div>
     </section>
 
