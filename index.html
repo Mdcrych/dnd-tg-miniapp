@@ -148,7 +148,7 @@
     <section id="step-devskills" class="step">
       <h2>Шаг 4: Скиллы развития</h2>
       <p class="hint">Выберите <strong>до 2 скиллов развития</strong>. Скиллы привязаны к классам, но доступны любому персонажу.<br>
-        Класс указан рядом с каждым скиллом.</p>
+        Класс персонажа указан рядом с каждым скиллом.</p>
       <div id="devskills-count" class="devskills-count">Выбрано: 0 / 2</div>
       <div id="devskills-container"></div>
       <div class="nav-buttons">
@@ -217,6 +217,25 @@
         <button onclick="prevStep(7); loadSaved();">← К списку</button>
       </div>
     </section>
+
+    <!-- Step 9: Skills subpage -->
+    <section id="step-skills-sub" class="step">
+      <h2>Навыки</h2>
+      <div id="skills-sub-content"></div>
+      <div class="nav-buttons">
+        <button id="skills-sub-back">← Назад</button>
+      </div>
+    </section>
+
+    <!-- Step 10: Dev Skills subpage -->
+    <section id="step-devskills-sub" class="step">
+      <h2>Скиллы развития</h2>
+      <div id="devskills-sub-content"></div>
+      <div class="nav-buttons">
+        <button id="devskills-sub-back">← Назад</button>
+      </div>
+    </section>
+
   </div>
 
   <script src="app.js"></script>

@@ -137,12 +137,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .devskill-row.devskill-selected { border-color: #00ffe0; background: #0a1f30; }
 .devskill-cb { margin-top: 3px; accent-color: #00ffe0; width: 16px; height: 16px; flex-shrink: 0; }
 .devskill-info { flex: 1; }
-.devskill-name { font-size: 0.92rem; color: #c8d8e8; font-weight: 600; margin-bottom: 0.2rem; }
+.devskill-name { font-size: 0.92rem; color: #c8d8e8; font-weight: 600; margin-bottom: 0.2rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; }
 .devskill-desc { font-size: 0.78rem; color: #556677; line-height: 1.4; }
 .devskill-class-badge {
   font-size: 0.68rem; color: #00ffe0; background: #0a1f30;
   border: 1px solid #00ffe040; border-radius: 4px;
-  padding: 1px 5px; margin-left: 6px; vertical-align: middle;
+  padding: 1px 5px; vertical-align: middle;
 }
 
 /* ====== SUMMARY ====== */
@@ -171,7 +171,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .errors { background: #1a0a0a; border: 1px solid #cc2233; border-radius: 8px; padding: 0.7rem 1rem; color: #ff6677; font-size: 0.88rem; }
 .success { background: #0a1a0a; border: 1px solid #22cc55; border-radius: 8px; padding: 0.7rem 1rem; color: #44dd88; font-size: 0.88rem; }
 
-/* ====== SAVED LIST (строки вместо карточек) ====== */
+/* ====== SAVED LIST ====== */
 #saved-list { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1rem; }
 .char-list-row {
   display: flex; align-items: center; justify-content: space-between;
@@ -195,6 +195,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .sheet-name { font-size: 1.4rem; color: #00ffe0; font-weight: 700; letter-spacing: 1px; }
 .sheet-concept { font-size: 0.88rem; color: #6688aa; font-style: italic; margin-top: 0.25rem; }
 .sheet-meta { font-size: 0.8rem; color: #446688; margin-top: 0.3rem; }
+.sheet-spec { font-size: 0.78rem; color: #00ffe0; margin-top: 0.35rem; opacity: 0.75; }
 
 .derived-stats-sheet {
   display: flex; flex-wrap: wrap; gap: 0.5rem;
@@ -207,6 +208,14 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   letter-spacing: 1px; padding: 0.4rem 0; margin-top: 0.8rem;
   border-bottom: 1px solid #1e3050;
 }
+.subpage-section-link {
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  border-radius: 6px; padding: 0.45rem 0.5rem;
+  transition: background 0.15s;
+}
+.subpage-section-link:hover { background: #0d1b2a; }
+.section-arrow { font-size: 1.2rem; color: #336688; }
+
 .sheet-row {
   display: flex; justify-content: space-between; align-items: baseline;
   padding: 0.4rem 0; border-bottom: 1px solid #0d1b2a; font-size: 0.9rem;
@@ -229,6 +238,34 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .sheet-devskill-class { font-size: 0.68rem; color: #00ffe0; background: #0a1f30;
   border: 1px solid #00ffe040; border-radius: 4px; padding: 2px 6px; }
 .sheet-devskill-desc { font-size: 0.8rem; color: #556677; line-height: 1.45; }
+
+/* ====== SUBPAGE ROWS (навыки / скиллы развития как подстраницы) ====== */
+.subpage-row {
+  background: #0d1b2a; border: 1px solid #1e3050; border-radius: 8px;
+  padding: 0.6rem 0.85rem; margin-bottom: 0.4rem;
+}
+.subpage-row-main {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 0.92rem;
+}
+.subpage-name { color: #c8d8e8; font-weight: 600; }
+.subpage-value { color: #00ffe0; }
+.subpage-bonus { font-size: 0.75rem; color: #446688; }
+.subpage-base { font-size: 0.72rem; color: #446688; margin-top: 0.2rem; }
+.subpage-devskill-row {
+  background: #0d1b2a; border: 1px solid #1e3050; border-radius: 8px;
+  padding: 0.65rem 0.85rem; margin-bottom: 0.45rem;
+}
+.subpage-devskill-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem;
+}
+.subpage-devskill-name { font-size: 0.95rem; color: #c8d8e8; font-weight: 600; }
+.subpage-devskill-class {
+  font-size: 0.68rem; color: #00ffe0; background: #0a1f30;
+  border: 1px solid #00ffe040; border-radius: 4px; padding: 2px 6px;
+}
+.subpage-devskill-desc { font-size: 0.8rem; color: #556677; line-height: 1.45; }
+.subpage-empty { font-size: 0.88rem; color: #446688; padding: 0.5rem 0; }
 
 /* ====== DICE ====== */
 .dice-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.7rem; margin: 0.8rem 0; }

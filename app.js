@@ -67,7 +67,7 @@ const SKILLS = [
   { name: 'Выживание в городе', base: 'PER' },
 ];
 
-// ======= DEV SKILLS (скиллы развития по классам) =======
+// ======= DEV SKILLS =======
 const DEV_SKILLS = [
   // Уличный наёмник (merc)
   { name: 'Боевое чутьё',         class: 'merc',        classLabel: 'Уличный наёмник',     desc: 'Раз в сцену переброси один промах в рукопашной.' },
@@ -126,15 +126,20 @@ const ORIGIN_LABELS = {
 // ======= STATE =======
 let abilityValues = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
 let TOTAL_POINTS = 6;
-let selectedDevSkills = []; // array of dev skill names
+let selectedDevSkills = [];
 let currentPopupAb = null;
 let currentPopupAbValues = null;
 
 // ======= STEP NAVIGATION =======
 // Steps: 1=basic, 2=abilities, 3=skills, 4=devskills, 5=dice, 6=summary, 7=saved, 8=char-sheet
+// Subpages: 9=skills-subpage (из charsheet), 10=devskills-subpage (из charsheet)
 function showStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  const ids = ['step-basic','step-abilities','step-skills','step-devskills','step-dice','step-summary','step-saved','step-charsheet'];
+  const ids = [
+    'step-basic','step-abilities','step-skills','step-devskills',
+    'step-dice','step-summary','step-saved','step-charsheet',
+    'step-skills-sub','step-devskills-sub'
+  ];
   const el = document.getElementById(ids[n-1]);
   if (el) el.classList.add('active');
   window.scrollTo(0,0);
@@ -393,7 +398,7 @@ function executeRoll() {
 
 function roll20() { return Math.ceil(Math.random() * 20); }
 
-// ======= SKILLS (step 3) — без специализации =======
+// ======= SKILLS (step 3) =======
 function initSkills() {
   const c = document.getElementById('skills-container');
   c.innerHTML = SKILLS.map((sk, i) => `
@@ -433,7 +438,6 @@ function validateSkills() {
 // ======= DEV SKILLS (step 4) =======
 function initDevSkills() {
   const c = document.getElementById('devskills-container');
-  // group by class
   const byClass = {};
   DEV_SKILLS.forEach(sk => {
     if (!byClass[sk.class]) byClass[sk.class] = [];
@@ -450,7 +454,10 @@ function initDevSkills() {
             <input type="checkbox" class="devskill-cb" value="${sk.name}" ${checked}
               onchange="toggleDevSkill('${sk.name.replace(/'/g, '\\'')}', this)" />
             <div class="devskill-info">
-              <div class="devskill-name">${sk.name}</div>
+              <div class="devskill-name">
+                ${sk.name}
+                <span class="devskill-class-badge">${sk.classLabel}</span>
+              </div>
               <div class="devskill-desc">${sk.desc}</div>
             </div>
           </label>`;
@@ -547,7 +554,11 @@ function buildSummary() {
   const devRows = selectedDevSkills.length
     ? selectedDevSkills.map(name => {
         const sk = DEV_SKILLS.find(d => d.name === name);
-        return sk ? `<div class="s-row"><span class="s-label">${sk.name} <span class="devskill-class-badge">${sk.classLabel}</span></span><span class="s-value s-value-desc">${sk.desc}</span></div>` : '';
+        return sk ? `
+          <div class="s-row">
+            <span class="s-label">${sk.name} <span class="devskill-class-badge">${sk.classLabel}</span></span>
+            <span class="s-value s-value-desc">${sk.desc}</span>
+          </div>` : '';
       }).join('')
     : '<div class="s-row"><span class="s-label">—</span></div>';
 
@@ -616,7 +627,7 @@ function saveCharacter() {
   nextStep(7);
 }
 
-// ======= SAVED LIST (step 7) — строки, не карточки =======
+// ======= SAVED LIST (step 7) — строки =======
 function loadSaved() {
   const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
   const list  = document.getElementById('saved-list');
@@ -655,7 +666,14 @@ function openCharSheet(charIndex) {
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
 
-  // Derived stats block
+  // Специализация — выводится из скиллов развития
+  const devSkillNames = c.devSkills || [];
+  const specializations = devSkillNames.map(name => {
+    const sk = DEV_SKILLS.find(d => d.name === name);
+    return sk ? sk.classLabel : null;
+  }).filter(Boolean);
+  const uniqueSpecs = [...new Set(specializations)];
+
   const derivedHtml = `
     <div class="derived-stats-sheet">
       <div class="derived-item"><div class="derived-label">HP</div><div class="derived-val">${HP}</div></div>
@@ -666,7 +684,6 @@ function openCharSheet(charIndex) {
     </div>
   `;
 
-  // Abilities with roll buttons
   const abHtml = ABILITIES.map(ab => {
     const val = abs[ab] ?? 3;
     const mod = AB_MOD[val] ?? 0;
@@ -678,7 +695,6 @@ function openCharSheet(charIndex) {
       </div>`;
   }).join('');
 
-  // Skills list
   const skills = c.skills || [];
   const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
   const skillsHtml = skills.length
@@ -689,8 +705,6 @@ function openCharSheet(charIndex) {
         </div>`).join('')
     : '<div class="sheet-row"><span class="sheet-label">—</span></div>';
 
-  // Dev skills list
-  const devSkillNames = c.devSkills || [];
   const devSkillsHtml = devSkillNames.length
     ? devSkillNames.map(name => {
         const sk = DEV_SKILLS.find(d => d.name === name);
@@ -711,19 +725,74 @@ function openCharSheet(charIndex) {
       <div class="sheet-name">${c.name}</div>
       ${c.concept ? `<div class="sheet-concept">${c.concept}</div>` : ''}
       <div class="sheet-meta">${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1} + ${KIT_LABELS[c.k2]||c.k2}</div>
+      ${uniqueSpecs.length ? `<div class="sheet-spec">Специализация: ${uniqueSpecs.join(', ')}</div>` : ''}
     </div>
     ${derivedHtml}
     <div class="sheet-section">Характеристики <span class="section-hint">— нажми для броска</span></div>
     ${abHtml}
-    <div class="sheet-section">Навыки</div>
-    ${skillsHtml}
-    <div class="sheet-section">Скиллы развития</div>
-    ${devSkillsHtml}
+    <div class="sheet-section subpage-section-link" onclick="openSkillsSubpage(${charIndex})">
+      Навыки <span class="section-arrow">›</span>
+    </div>
+    <div class="sheet-section subpage-section-link" onclick="openDevSkillsSubpage(${charIndex})">
+      Скиллы развития <span class="section-arrow">›</span>
+    </div>
   `;
 
-  // Store charIndex for popup
   document.getElementById('charsheet-content').dataset.charIndex = charIndex;
   showStep(8);
+}
+
+// ======= SKILLS SUBPAGE (step 9) =======
+function openSkillsSubpage(charIndex) {
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  const c = saved[charIndex];
+  if (!c) return;
+
+  const skills = c.skills || [];
+  const SKILL_LEVEL_NAMES = { 0: 'Необучен', 2: 'Обучен', 4: 'Эксперт', 6: 'Мастер' };
+
+  const rows = skills.length
+    ? skills.map(s => `
+        <div class="subpage-row">
+          <div class="subpage-row-main">
+            <span class="subpage-name">${s.name}</span>
+            <span class="subpage-value">${SKILL_LEVEL_NAMES[s.bonus] || '—'} <span class="subpage-bonus">(+${s.bonus})</span></span>
+          </div>
+          <div class="subpage-base">${s.base}</div>
+        </div>`).join('')
+    : '<div class="subpage-empty">Нет выбранных навыков</div>';
+
+  document.getElementById('skills-sub-content').innerHTML = rows;
+  document.getElementById('skills-sub-back').onclick = () => openCharSheet(charIndex);
+  showStep(9);
+}
+
+// ======= DEV SKILLS SUBPAGE (step 10) =======
+function openDevSkillsSubpage(charIndex) {
+  const saved = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+  const c = saved[charIndex];
+  if (!c) return;
+
+  const devSkillNames = c.devSkills || [];
+
+  const rows = devSkillNames.length
+    ? devSkillNames.map(name => {
+        const sk = DEV_SKILLS.find(d => d.name === name);
+        if (!sk) return '';
+        return `
+          <div class="subpage-devskill-row">
+            <div class="subpage-devskill-header">
+              <span class="subpage-devskill-name">${sk.name}</span>
+              <span class="subpage-devskill-class">${sk.classLabel}</span>
+            </div>
+            <div class="subpage-devskill-desc">${sk.desc}</div>
+          </div>`;
+      }).join('')
+    : '<div class="subpage-empty">Нет выбранных скиллов развития</div>';
+
+  document.getElementById('devskills-sub-content').innerHTML = rows;
+  document.getElementById('devskills-sub-back').onclick = () => openCharSheet(charIndex);
+  showStep(10);
 }
 
 function openPopupFromSaved(ab, charIndex) {

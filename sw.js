@@ -1,4 +1,4 @@
-const CACHE = 'cp-builder-v1';
+const CACHE_VERSION = 'cp-builder-v6';
 const ASSETS = [
   '/dnd-tg-miniapp/',
   '/dnd-tg-miniapp/index.html',
@@ -9,7 +9,7 @@ const ASSETS = [
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_VERSION).then(cache => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
@@ -17,23 +17,38 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-  // Cache-first for same-origin assets, network-first for everything else
-  if (e.request.url.startsWith(self.location.origin)) {
+  if (!e.request.url.startsWith(self.location.origin)) return;
+
+  // Network-first для navigate (новый заход на страницу) — обновляет кэш
+  if (e.request.mode === 'navigate') {
     e.respondWith(
-      caches.match(e.request).then(cached =>
-        cached || fetch(e.request).then(res => {
+      fetch(e.request)
+        .then(res => {
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
           return res;
         })
-      )
+        .catch(() => caches.match(e.request))
     );
+    return;
   }
+
+  // Cache-first для статики (JS, CSS, иконки) — страница уже открыта
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE_VERSION).then(c => c.put(e.request, clone));
+        return res;
+      });
+    })
+  );
 });
