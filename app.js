@@ -1,5 +1,36 @@
-// ======= Telegram Web App Init =======
-const tg = window.Telegram?.WebApp;
+// ======= PWA: Service Worker registration =======
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/dnd-tg-miniapp/sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+// ======= PWA: Install prompt =======
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('btn-install');
+  if (btn) btn.classList.remove('hidden');
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('btn-install');
+  if (btn) btn.classList.add('hidden');
+  deferredInstallPrompt = null;
+});
+function triggerInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-install');
+  if (btn) btn.addEventListener('click', triggerInstall);
+});
+
+// ======= Telegram Web App Init (optional) =======
+const tg = window.Telegram?.WebApp ?? null;
 if (tg) { tg.ready(); tg.expand(); }
 
 // ======= DATA =======
@@ -17,7 +48,6 @@ const AB_DESC = {
   TEC: 'ремонт, дроны, импланты'
 };
 
-// value → modifier per rulebook
 const AB_MOD = { 1: -2, 2: -1, 3: 0, 4: 1, 5: 2 };
 
 const SKILLS = [
@@ -45,23 +75,6 @@ const SKILLS = [
   { name: 'Репутация',         base: 'WIL / PER' },
   { name: 'Выживание в городе',base: 'PER' },
 ];
-
-const SKILL_LEVELS = [
-  { label: '—',        bonus: null },
-  { label: 'Необучен', bonus: 0 },
-  { label: 'Обучен',   bonus: 2 },
-  { label: 'Эксперт',  bonus: 4 },
-  { label: 'Мастер',   bonus: 6 },
-];
-
-const DC_LABELS = {
-  8:  'Очень легко',
-  10: 'Легко',
-  13: 'Стандартно',
-  16: 'Трудно',
-  19: 'Очень трудно',
-  22: 'Экстремально',
-};
 
 const KIT_LABELS = {
   merc: 'Уличный наёмник', tech: 'Подпольный техник', netrunner: 'Сетевой беглец',
@@ -120,7 +133,7 @@ function validateStep(s) {
 
 function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
 function err(msg) {
-  if (tg) tg.showAlert(msg);
+  if (tg?.showAlert) tg.showAlert(msg);
   else alert(msg);
   return false;
 }
@@ -149,21 +162,15 @@ function changeAb(ab, delta) {
   const cur = abilityValues[ab];
   const next = cur + delta;
   if (next < 1 || next > 5) return;
-
-  const cost = delta > 0
-    ? pointCost(cur, next)
-    : -pointCost(next, cur);
-
+  const cost = delta > 0 ? pointCost(cur, next) : -pointCost(next, cur);
   const remaining = getRemainingPoints();
   if (delta > 0 && cost > remaining) { err(`Недостаточно очков! Нужно ${cost}, осталось ${remaining}`); return; }
-
   abilityValues[ab] = next;
   refreshAb(ab);
   refreshPoints();
 }
 
 function pointCost(from, to) {
-  // 3→4 = 1, 4→5 = 2
   let cost = 0;
   for (let i = from; i < to; i++) cost += (i >= 4 ? 2 : 1);
   return cost;
@@ -205,7 +212,7 @@ function openPopup(ab) {
   const mod = AB_MOD[val] ?? 0;
   document.getElementById('popup-title').textContent = `Проверка ${AB_FULL[ab]} (${ab})`;
   document.getElementById('popup-formula').textContent =
-    `1d20 + ${mod >= 0 ? '+' : ''}${mod} (мод) + навык + ситуатив = 1d20 + мод`;
+    `1d20 + ${mod >= 0 ? '+' : ''}${mod} (мод) + навык + ситуатив`;
   document.getElementById('popup-result').classList.add('hidden');
   document.querySelector('input[name=adv][value=normal]').checked = true;
   document.getElementById('ability-roll-popup').classList.remove('hidden');
@@ -230,17 +237,9 @@ function executeRoll() {
 
   let d1 = roll20(), d2 = roll20();
   let chosen, rolls;
-
-  if (adv === 'advantage') {
-    chosen = Math.max(d1, d2);
-    rolls = `[${d1}, ${d2}] → ${chosen}`;
-  } else if (adv === 'disadvantage') {
-    chosen = Math.min(d1, d2);
-    rolls = `[${d1}, ${d2}] → ${chosen}`;
-  } else {
-    chosen = d1;
-    rolls = `${d1}`;
-  }
+  if (adv === 'advantage')    { chosen = Math.max(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
+  else if (adv === 'disadvantage') { chosen = Math.min(d1,d2); rolls = `[${d1}, ${d2}] → ${chosen}`; }
+  else { chosen = d1; rolls = `${d1}`; }
 
   const total = chosen + mod + skillBonus;
   const isCritSuccess = chosen === 20;
@@ -248,21 +247,14 @@ function executeRoll() {
   const diff = total - dc;
 
   let verdict, cls;
-  if (isCritFail) {
-    verdict = '💀 Критический провал! Осложнение.'; cls = 'crit-fail';
-  } else if (isCritSuccess) {
-    verdict = '⚡ Критический успех!'; cls = 'crit-success';
-  } else if (diff >= 0) {
-    verdict = `✅ Успех! (+${diff} к DC ${dc})`; cls = 'success';
-  } else if (diff >= -2) {
-    verdict = `⚠️ Успех с ценой? (не хватило ${Math.abs(diff)})`; cls = 'close';
-  } else {
-    verdict = `❌ Провал (не хватило ${Math.abs(diff)})`; cls = 'fail';
-  }
+  if (isCritFail)       { verdict = '💀 Критический провал! Осложнение.'; cls = 'crit-fail'; }
+  else if (isCritSuccess) { verdict = '⚡ Критический успех!'; cls = 'crit-success'; }
+  else if (diff >= 0)   { verdict = `✅ Успех! (+${diff} к DC ${dc})`; cls = 'success'; }
+  else if (diff >= -2)  { verdict = `⚠️ Успех с ценой? (не хватило ${Math.abs(diff)})`; cls = 'close'; }
+  else                  { verdict = `❌ Провал (не хватило ${Math.abs(diff)})`; cls = 'fail'; }
 
-  const skillLvl = ['Необучен','Обучен','Эксперт','Мастер'][skillBonus/2] || 'Необучен';
   const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
-  const sklStr = skillBonus > 0 ? ` + ${skillBonus} (${skillLvl})` : '';
+  const sklStr = skillBonus > 0 ? ` + ${skillBonus}` : '';
 
   const resEl = document.getElementById('popup-result');
   resEl.classList.remove('hidden');
@@ -278,8 +270,7 @@ function executeRoll() {
     else tg.HapticFeedback.impactOccurred('medium');
   }
 
-  // Add to global roll history
-  addHistory(`Проверка ${ab}: d20=${chosen} + ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess ? 'КРИТ!' : isCritFail ? 'ФЕЙЛ!' : diff >= 0 ? 'Успех' : 'Провал'}`);
+  addHistory(`${ab}: d20=${chosen} ${modStr}${sklStr} = ${total} (DC ${dc}) → ${isCritSuccess ? 'КРИТ!' : isCritFail ? 'ФЕЙЛ!' : diff >= 0 ? 'Успех' : 'Провал'}`);
 }
 
 function roll20() { return Math.ceil(Math.random() * 20); }
@@ -311,7 +302,7 @@ function getSkillLevels() {
   });
 }
 
-function onSkillChange() {} // hook for future logic
+function onSkillChange() {}
 
 function validateSkills() {
   const levels = getSkillLevels();
@@ -325,7 +316,7 @@ function validateSkills() {
   return errs;
 }
 
-// ======= DICE ROLLER (standalone) =======
+// ======= DICE ROLLER =======
 let rollHistoryLog = [];
 
 function rollDice(sides) {
@@ -335,12 +326,10 @@ function rollDice(sides) {
   const label = count > 1
     ? `${count}d${sides}: [${results.join(', ')}] = ${total}`
     : `d${sides}: ${total}`;
-
   const resultEl = document.getElementById('roll-result');
   resultEl.classList.remove('hidden');
   resultEl.textContent = label;
   addHistory(label);
-
   if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
@@ -353,7 +342,7 @@ function addHistory(text) {
   if (hist.children.length > 25) hist.lastChild.remove();
 }
 
-// ======= SUMMARY + DERIVED STATS =======
+// ======= SUMMARY =======
 function buildSummary() {
   const name    = v('char-name');
   const concept = v('char-concept');
@@ -361,13 +350,12 @@ function buildSummary() {
   const k1      = v('char-kit1');
   const k2      = v('char-kit2');
 
-  // Derived stats
   const STR = abilityValues.STR, WIL = abilityValues.WIL,
-        INT = abilityValues.INT, DEX = abilityValues.DEX, PER = abilityValues.PER;
+        INT = abilityValues.INT, DEX = abilityValues.DEX;
   const modDEX = AB_MOD[DEX];
   const HP       = 10 + STR + WIL;
   const STRESS   = 10 + WIL + INT;
-  const DEF      = 10 + modDEX;  // +0 armor base
+  const DEF      = 10 + modDEX;
   const HUMANITY = 10 + WIL;
   const IMPL_LIM = WIL + 1;
 
@@ -383,10 +371,7 @@ function buildSummary() {
     <div class="s-section">Характеристики</div>
     ${ABILITIES.map(ab => {
       const m = mods[ab];
-      return `<div class="s-row">
-        <span class="s-label">${AB_FULL[ab]} (${ab})</span>
-        <span class="s-value">${abilityValues[ab]} (${m>=0?'+':''}${m})</span>
-      </div>`;
+      return `<div class="s-row"><span class="s-label">${AB_FULL[ab]} (${ab})</span><span class="s-value">${abilityValues[ab]} (${m>=0?'+':''}${m})</span></div>`;
     }).join('')}
     <div class="s-section">Навыки</div>
     ${getSkillLevels().filter(s => s.bonus !== null).map(s => {
@@ -398,7 +383,7 @@ function buildSummary() {
   document.getElementById('derived-stats').innerHTML = `
     <div class="derived-item"><div class="derived-label">HP</div><div class="derived-val">${HP}</div></div>
     <div class="derived-item"><div class="derived-label">STRESS</div><div class="derived-val">${STRESS}</div></div>
-    <div class="derived-item"><div class="derived-label">DEF (base)</div><div class="derived-val">${DEF}</div></div>
+    <div class="derived-item"><div class="derived-label">DEF</div><div class="derived-val">${DEF}</div></div>
     <div class="derived-item"><div class="derived-label">HUMANITY</div><div class="derived-val">${HUMANITY}</div></div>
     <div class="derived-item"><div class="derived-label">IMPLANT LIM</div><div class="derived-val">${IMPL_LIM}</div></div>
     <div class="derived-item"><div class="derived-label">RAM</div><div class="derived-val">—</div></div>
@@ -412,30 +397,24 @@ function validateBuild() {
   const fives = ABILITIES.filter(ab => abilityValues[ab] === 5);
   if (fives.length > 2) errors.push(`❌ Нельзя иметь более двух характеристик на 5 (${fives.join(', ')})`);
   if (getRemainingPoints() < 0) errors.push('❌ Потрачено больше 6 очков характеристик');
-
   const levels = getSkillLevels();
-  const trained = levels.filter(s => s.bonus === 2).length;
-  const expert  = levels.filter(s => s.bonus === 4).length;
-  const master  = levels.filter(s => s.bonus === 6).length;
-  if (trained > 5)  errors.push(`❌ Обученных навыков: ${trained} (макс. 5)`);
-  if (expert > 1)   errors.push(`❌ Навыков Эксперт: ${expert} (макс. 1)`);
-  if (master > 0)   errors.push('❌ Уровень Мастер недоступен при создании');
+  if (levels.filter(s => s.bonus === 2).length > 5) errors.push('❌ Обученных навыков: больше 5');
+  if (levels.filter(s => s.bonus === 4).length > 1) errors.push('❌ Навыков Эксперт: больше 1');
+  if (levels.filter(s => s.bonus === 6).length > 0) errors.push('❌ Уровень Мастер недоступен при создании');
 
   const errEl = document.getElementById('validation-errors');
   const okEl  = document.getElementById('validation-ok');
   if (errors.length > 0) {
-    errEl.classList.remove('hidden');
-    okEl.classList.add('hidden');
+    errEl.classList.remove('hidden'); okEl.classList.add('hidden');
     errEl.innerHTML = errors.map(e => `<p>${e}</p>`).join('');
     document.getElementById('btn-save').disabled = true;
   } else {
-    errEl.classList.add('hidden');
-    okEl.classList.remove('hidden');
+    errEl.classList.add('hidden'); okEl.classList.remove('hidden');
     document.getElementById('btn-save').disabled = false;
   }
 }
 
-// ======= SAVE =======
+// ======= SAVE / LOAD / EXPORT / IMPORT =======
 function saveCharacter() {
   const char = {
     name: v('char-name'), concept: v('char-concept'),
@@ -448,8 +427,11 @@ function saveCharacter() {
   saved.push(char);
   localStorage.setItem('cp_characters', JSON.stringify(saved));
 
-  if (tg) tg.sendData(JSON.stringify(char));
-  else alert(`Персонаж «${char.name}» сохранён!`);
+  // Send to Telegram bot only if running inside Telegram
+  if (tg?.sendData) {
+    tg.sendData(JSON.stringify(char));
+  }
+
   nextStep(6);
 }
 
@@ -464,6 +446,7 @@ function loadSaved() {
         <p>${ORIGIN_LABELS[c.origin]||c.origin} · ${KIT_LABELS[c.k1]||c.k1} + ${KIT_LABELS[c.k2]||c.k2}</p>
         <p>STR:${c.abilities?.STR} DEX:${c.abilities?.DEX} INT:${c.abilities?.INT} WIL:${c.abilities?.WIL} PER:${c.abilities?.PER} TEC:${c.abilities?.TEC}</p>
         ${c.concept ? `<p><em>${c.concept}</em></p>` : ''}
+        <small>${new Date(c.createdAt).toLocaleDateString('ru-RU')}</small>
       </div>
       <button class="btn-delete" onclick="deleteChar(${i})">🗑</button>
     </div>
@@ -475,6 +458,36 @@ function deleteChar(i) {
   saved.splice(i,1);
   localStorage.setItem('cp_characters', JSON.stringify(saved));
   loadSaved();
+}
+
+function exportChars() {
+  const saved = localStorage.getItem('cp_characters') || '[]';
+  const blob = new Blob([saved], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `cp_characters_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importChars(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('Неверный формат');
+      const existing = JSON.parse(localStorage.getItem('cp_characters') || '[]');
+      localStorage.setItem('cp_characters', JSON.stringify([...existing, ...data]));
+      loadSaved();
+      alert(`Импортировано ${data.length} персонаж(ей)`);
+    } catch (err) {
+      alert('Ошибка импорта: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 function newCharacter() {

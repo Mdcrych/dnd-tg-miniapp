@@ -2,16 +2,35 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#00ffe0" />
+  <meta name="description" content="Конструктор персонажей в стиле Cyberpunk/DnD. Работает офлайн." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CP Builder" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cyberpunk Character Builder" />
+  <meta property="og:description" content="Собери персонажа для Cyberpunk/DnD прямо в браузере — без регистрации, работает офлайн" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mdcrych.github.io/dnd-tg-miniapp/" />
+
   <title>Cyberpunk Character Builder</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Telegram SDK: loaded only if running inside Telegram, safe to ignore otherwise -->
+  <script src="https://telegram.org/js/telegram-web-app.js" onerror="window.__tgLoadFailed=true"></script>
 </head>
 <body>
   <div id="app">
     <header>
       <h1>⚡ Cyberpunk Builder</h1>
       <div id="header-sub">Rulebook v0.5</div>
+      <!-- PWA install prompt -->
+      <button id="btn-install" class="btn-install hidden" aria-label="Установить приложение">📲 Установить</button>
     </header>
 
     <!-- Step 1: Concept & Origin -->
@@ -175,7 +194,12 @@
     <section id="step-saved" class="step">
       <h2>Сохранённые персонажи</h2>
       <div id="saved-list"></div>
-      <button onclick="newCharacter()">➕ Новый персонаж</button>
+      <div class="nav-buttons">
+        <button onclick="newCharacter()">➕ Новый персонаж</button>
+        <button id="btn-export" onclick="exportChars()">📤 Экспорт JSON</button>
+        <button id="btn-import-trigger" onclick="document.getElementById('import-file').click()">📥 Импорт JSON</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importChars(event)" />
+      </div>
     </section>
   </div>
 
