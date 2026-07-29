@@ -37,27 +37,41 @@ const AB_FULL = {
 };
 const AB_MOD = { 1: -2, 2: -1, 3: 0, 4: 1, 5: 2 };
 
+// Полный список навыков из рулбука v0.6
 const SKILLS = [
+  // --- Физические ---
   { name: 'Атлетика',           base: 'STR' },
+  { name: 'Акробатика',         base: 'DEX' },
   { name: 'Ближний бой',        base: 'STR / DEX' },
   { name: 'Стрельба',           base: 'DEX' },
   { name: 'Скрытность',         base: 'DEX' },
-  { name: 'Акробатика',         base: 'DEX' },
+  { name: 'Выживание',          base: 'STR / WIL' },
+  { name: 'Запугивание',        base: 'STR / WIL' },
+  // --- Технические ---
   { name: 'Взлом',              base: 'INT / TEC' },
-  { name: 'Анализ',             base: 'INT' },
   { name: 'Электроника',        base: 'TEC' },
   { name: 'Ремонт',             base: 'TEC' },
-  { name: 'Медицина',           base: 'INT / TEC' },
-  { name: 'Вождение',           base: 'DEX' },
-  { name: 'Пилотирование',      base: 'DEX / TEC' },
   { name: 'Дроны',              base: 'TEC' },
+  { name: 'Пилотирование',      base: 'DEX / TEC' },
+  { name: 'Вождение',           base: 'DEX' },
+  { name: 'Оружейное дело',     base: 'TEC' },
+  { name: 'Взрывчатка',         base: 'TEC / INT' },
+  // --- Интеллектуальные ---
+  { name: 'Анализ',             base: 'INT' },
+  { name: 'Медицина',           base: 'INT / TEC' },
+  { name: 'Уличная смекалка',   base: 'INT / PER' },
+  { name: 'Криминалистика',     base: 'INT' },
+  { name: 'История и культура', base: 'INT' },
+  { name: 'Тактика',            base: 'INT / WIL' },
+  // --- Социальные ---
   { name: 'Внимательность',     base: 'PER' },
   { name: 'Переговоры',         base: 'PER / WIL' },
-  { name: 'Исполнение',         base: 'PER / WIL' },
   { name: 'Убеждение',          base: 'WIL' },
+  { name: 'Исполнение',         base: 'PER / WIL' },
+  { name: 'Обман',              base: 'WIL / PER' },
   { name: 'Торговля',           base: 'PER' },
   { name: 'Связи',              base: 'PER / WIL' },
-  { name: 'Уличная смекалка',   base: 'INT / PER' },
+  { name: 'Допрос',             base: 'WIL / PER' },
 ];
 
 const ALL_DEVSKILLS = [
@@ -94,7 +108,6 @@ const KIT_LABELS = {
   dronebuilder:'Сборщик дронов',
 };
 
-// Бонусы пакетов: каждый вариант — { label, skill?, val?, multi? }
 const KIT_BONUSES = {
   merc:        [
     { label: 'Стрельба +2',                       skill: 'Стрельба',     val: 2 },
@@ -155,11 +168,11 @@ const UPGRADE_COST_STAT  = { 3: 3, 4: 5 };
 // ======= STATE =======
 let abilities = { STR:3, DEX:3, INT:3, WIL:3, PER:3, TEC:3 };
 let pointsLeft = 6;
-let skillRanks = {}; // { name: 0|1|2|3 }
+let skillRanks = {};
 let selectedDevskills = [];
 let savedChars = [];
 let currentCharIndex = -1;
-let upgradeChar = null; // working copy during upgrade
+let upgradeChar = null;
 
 // ======= STORAGE =======
 function saveToStorage() {
@@ -218,16 +231,23 @@ function getKitBonusIndex(n) {
 }
 
 // ======= ABILITIES =======
+// Правила распределения:
+//   Базовое значение = 3. Всего 6 очков для распределения.
+//   Повышение: 3→4 стоит 1 очко, 4→5 стоит 2 очка.
+//   Понижение: 3→2 возвращает 1 очко, 2→1 возвращает 1 очко.
+//   Минимум = 1, максимум = 5. Не более двух характеристик на 5.
 function renderAbilities() {
   const container = document.getElementById('ability-scores');
   container.innerHTML = ABILITIES.map(ab => {
     const v = abilities[ab];
+    const canDec = v > 1;
+    const canInc = v < 5;
     return `<div class="ability-row">
       <span class="ab-name">${AB_FULL[ab]} <small>(${ab})</small></span>
       <div class="ab-controls">
-        <button onclick="changeAb('${ab}',-1)" aria-label="−">−</button>
+        <button onclick="changeAb('${ab}',-1)" ${canDec?'':'disabled'} aria-label="−">−</button>
         <span class="ab-val">${v}</span>
-        <button onclick="changeAb('${ab}',1)" aria-label="+">+</button>
+        <button onclick="changeAb('${ab}',1)" ${canInc?'':'disabled'} aria-label="+">+</button>
       </div>
       <span class="ab-mod">${AB_MOD[v]>=0?'+':''}${AB_MOD[v]}</span>
     </div>`;
@@ -238,15 +258,31 @@ function renderAbilities() {
 function changeAb(ab, delta) {
   const cur = abilities[ab];
   const next = cur + delta;
+
+  // Жёсткие границы
   if (next < 1 || next > 5) return;
-  const fivesCount = ABILITIES.filter(a => abilities[a] === 5).length;
-  if (delta === 1 && next === 5 && fivesCount >= 2) { alert('Нельзя больше двух характеристик на 5!'); return; }
-  const cost = delta === 1
-    ? (cur >= 3 ? (cur === 4 ? 2 : 1) : -1)
-    : (cur > 3 ? (cur === 4 ? -1 : -2) : 1);
+
+  // Не более двух характеристик на 5
+  if (delta === 1 && next === 5) {
+    const fivesCount = ABILITIES.filter(a => abilities[a] === 5).length;
+    if (fivesCount >= 2) { alert('Нельзя больше двух характеристик на 5!'); return; }
+  }
+
+  // Стоимость изменения:
+  // +1: 3→4 = 1 очко, 4→5 = 2 очка
+  // −1: 4→3 = возврат 1, 5→4 = возврат 2, 3→2 = возврат 1, 2→1 = возврат 1
+  let cost;
+  if (delta === 1) {
+    cost = (cur >= 4) ? 2 : 1;   // 4→5 дорого, остальное по 1
+  } else {
+    cost = (cur >= 5) ? -2 : -1; // снимаем столько, сколько тратили
+  }
+
+  // Проверяем что хватает очков при увеличении
   if (delta === 1 && pointsLeft < cost) { alert('Не хватает очков!'); return; }
+
   abilities[ab] = next;
-  pointsLeft -= cost;
+  pointsLeft -= cost; // при delta=-1 cost отрицательный → pointsLeft растёт
   renderAbilities();
 }
 
@@ -541,8 +577,9 @@ function renderCharSheet(c) {
       ${(c.devskills||[]).length ? (c.devskills||[]).map(ds=>`<div class="devskill-card selected compact"><div class="devskill-header"><span class="devskill-name">${ds.name}</span><span class="devskill-class">${ds.class}</span></div><div class="devskill-desc">${ds.desc}</div></div>`).join('') : '<em>нет скилов</em>'}
     </div>
     ${(c.upgrades&&c.upgrades.length) ? `<div class="sheet-section"><h3>История прокачки</h3><div class="upgrades-log">${c.upgrades.map(u=>`<div class="upgrade-log-entry">${u}</div>`).join('')}</div></div>` : ''}
-    <div class="sheet-section">
-      <button class="btn-danger" onclick="deleteChar(${currentCharIndex})">🗑 Удалить персонажа</button>
+    <div class="nav-buttons">
+      <button class="btn-upgrade" onclick="openUpgradeModal()">⬆ Прокачать</button>
+      <button class="btn-danger" onclick="deleteChar(${currentCharIndex})">🗑 Удалить</button>
     </div>
   `;
 }
