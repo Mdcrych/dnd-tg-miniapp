@@ -21,7 +21,7 @@
   <div id="app">
     <header>
       <h1>⚡ Cyberpunk Builder</h1>
-      <div id="header-sub">Rulebook v0.5</div>
+      <div id="header-sub">Rulebook v0.6</div>
       <button id="btn-install" class="btn-install hidden" aria-label="Установить приложение">📲 Установить</button>
     </header>
 
@@ -47,8 +47,9 @@
           <option value="cult">Культ техно-плоти (+2 проверкам экзотичных имплантов)</option>
         </select>
       </label>
+
       <label>Пакет подготовки #1
-        <select id="char-kit1">
+        <select id="char-kit1" onchange="renderKitBonus(1)">
           <option value="">— Выберите пакет —</option>
           <option value="merc">Уличный наёмник</option>
           <option value="tech">Подпольный техник</option>
@@ -62,8 +63,10 @@
           <option value="dronebuilder">Сборщик дронов</option>
         </select>
       </label>
+      <div id="kit1-bonus-panel" class="kit-bonus-panel hidden"></div>
+
       <label>Пакет подготовки #2
-        <select id="char-kit2">
+        <select id="char-kit2" onchange="renderKitBonus(2)">
           <option value="">— Выберите второй пакет —</option>
           <option value="merc">Уличный наёмник</option>
           <option value="tech">Подпольный техник</option>
@@ -77,6 +80,8 @@
           <option value="dronebuilder">Сборщик дронов</option>
         </select>
       </label>
+      <div id="kit2-bonus-panel" class="kit-bonus-panel hidden"></div>
+
       <button onclick="nextStep(2)">Далее →</button>
     </section>
 
@@ -121,7 +126,7 @@
       </div>
     </section>
 
-    <!-- Step 5: Summary & Validation (бывший Step 6) -->
+    <!-- Step 5: Summary & Validation -->
     <section id="step-summary" class="step">
       <h2>Шаг 5: Лист персонажа</h2>
       <div id="summary-content"></div>
@@ -134,7 +139,7 @@
       </div>
     </section>
 
-    <!-- Step 6: Saved list (бывший Step 7) -->
+    <!-- Step 6: Saved list -->
     <section id="step-saved" class="step">
       <h2>Сохранённые персонажи</h2>
       <p class="hint">Нажми на персонажа, чтобы открыть полный лист.</p>
@@ -147,16 +152,17 @@
       </div>
     </section>
 
-    <!-- Step 7: Character Sheet subpage (бывший Step 8) -->
+    <!-- Step 7: Character Sheet subpage -->
     <section id="step-charsheet" class="step">
       <h2>Лист персонажа</h2>
       <div id="charsheet-content"></div>
       <div class="nav-buttons">
         <button onclick="prevStep(6); loadSaved();">← К списку</button>
+        <button class="btn-upgrade" onclick="openUpgradeModal()">⬆ Прокачать</button>
       </div>
     </section>
 
-    <!-- Step 8: Skills subpage (бывший Step 9) -->
+    <!-- Step 8: Skills subpage -->
     <section id="step-skills-sub" class="step">
       <h2>Навыки</h2>
       <div id="skills-sub-content"></div>
@@ -165,7 +171,7 @@
       </div>
     </section>
 
-    <!-- Step 9: Dev Skills subpage (бывший Step 10) -->
+    <!-- Step 9: Dev Skills subpage -->
     <section id="step-devskills-sub" class="step">
       <h2>Скиллы развития</h2>
       <div id="devskills-sub-content"></div>
@@ -183,6 +189,44 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- Upgrade Modal -->
+  <div id="upgrade-modal" class="modal-overlay hidden" onclick="closeUpgradeModalOutside(event)">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Прокачка персонажа">
+      <div class="modal-header">
+        <span class="modal-title">⬆ Прокачка персонажа</span>
+        <button class="modal-close" onclick="closeUpgradeModal()" aria-label="Закрыть">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="upgrade-dp-row">
+          <span>Очки развития (DP)</span>
+          <div class="upgrade-dp-controls">
+            <button class="upgrade-dp-btn" onclick="changeDP(-1)">−</button>
+            <span id="upgrade-dp-val" class="pts">0</span>
+            <button class="upgrade-dp-btn" onclick="changeDP(1)">+</button>
+          </div>
+        </div>
+        <div class="upgrade-tabs">
+          <button class="upgrade-tab active" onclick="switchUpgradeTab('skills', this)">Навыки</button>
+          <button class="upgrade-tab" onclick="switchUpgradeTab('stats', this)">Характеристики</button>
+          <button class="upgrade-tab" onclick="switchUpgradeTab('devskills', this)">Скиллы</button>
+        </div>
+        <div id="upgrade-tab-skills" class="upgrade-tab-content">
+          <div id="upgrade-skills-list"></div>
+        </div>
+        <div id="upgrade-tab-stats" class="upgrade-tab-content hidden">
+          <div id="upgrade-stats-list"></div>
+        </div>
+        <div id="upgrade-tab-devskills" class="upgrade-tab-content hidden">
+          <div id="upgrade-devskills-list"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="applyUpgrades()">✅ Применить</button>
+        <button onclick="closeUpgradeModal()">Отмена</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
