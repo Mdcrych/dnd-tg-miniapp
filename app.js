@@ -233,7 +233,6 @@ const IMPLANTS = [
   { id: 'bad_implant_a', name: 'Плохой имплант A', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
   { id: 'bad_implant_b', name: 'Плохой имплант B', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
 ];
-];
 
 const KIT_LABELS = {
   merc:        'Уличный наёмник',
@@ -512,12 +511,18 @@ function renderSummary() {
   const bonus1  = kit1val && KIT_BONUSES[kit1val] ? KIT_BONUSES[kit1val][getKitBonusIndex(1)].label : '—';
   const bonus2  = kit2val && KIT_BONUSES[kit2val] ? KIT_BONUSES[kit2val][getKitBonusIndex(2)].label : '—';
 
+  const originEl = document.getElementById('char-origin');
+  const originText =
+    originEl && originEl.selectedIndex >= 0
+      ? originEl.options[originEl.selectedIndex].text
+      : '—';
+
   document.getElementById('summary-content').innerHTML = `
     <div class="summary-block">
       <strong>${document.getElementById('char-name').value || '(без имени)'}</strong>
       <div class="summary-sub">${document.getElementById('char-concept').value || ''}</div>
     </div>
-    <div class="summary-row">Происхождение: <span>${document.getElementById('char-origin').options[document.getElementById('char-origin').selectedIndex].text}</span></div>
+    <div class="summary-row">Происхождение: <span>${originText}</span></div>
     <div class="summary-row">Пакет 1: <span>${kit1val ? KIT_LABELS[kit1val]+' → '+bonus1 : '—'}</span></div>
     <div class="summary-row">Пакет 2: <span>${kit2val ? KIT_LABELS[kit2val]+' → '+bonus2 : '—'}</span></div>
     <h3>Характеристики</h3>
