@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'cp-builder-v7';
+const CACHE_VERSION = 'cp-builder-v8';
 const ASSETS = [
   '/dnd-tg-miniapp/',
   '/dnd-tg-miniapp/index.html',
