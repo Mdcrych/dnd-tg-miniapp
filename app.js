@@ -75,24 +75,164 @@ const SKILLS = [
 ];
 
 const ALL_DEVSKILLS = [
-  { name: 'Прицельная очередь',  class: 'Боец',        dpCost: 2, desc: 'Перед броском атаки объяви прицел. Попадание — доп. эффект (дезориентация, замедление и т.д.).' },
-  { name: 'Двойной выстрел',     class: 'Боец',        dpCost: 3, desc: 'Два броска атаки за одно действие по одной цели или разным.' },
-  { name: 'Тяжёлый удар',        class: 'Боец',        dpCost: 2, desc: 'Ближний бой: +1 куб урона, цель делает проверку STR DC 13 или теряет малое действие.' },
-  { name: 'Базовый порт',        class: 'Нетраннер',   dpCost: 1, desc: '+2 MAX RAM. Открывает хаки Ping, Tag, Scan.' },
-  { name: 'Расширенная RAM',     class: 'Нетраннер',   dpCost: 2, desc: '+1 MAX RAM.' },
-  { name: 'Нейропорт',           class: 'Нетраннер',   dpCost: 2, desc: '+1 MAX RAM. Беспроводное подключение без физического кабеля.' },
-  { name: 'Разогнанный стек',    class: 'Нетраннер',   dpCost: 3, desc: 'Снижай цену хака на 1 RAM за 1d4 STRESS урона.' },
-  { name: 'Стабильная рука',     class: 'Рипер',       dpCost: 1, desc: '+2 к проверкам Медицины при оказании помощи.' },
-  { name: 'Полевая хирургия',    class: 'Рипер',       dpCost: 2, desc: 'Восстанавливает 2d6+2 HP за действие. Требует аптечку.' },
-  { name: 'Имплант-диагностика', class: 'Рипер',       dpCost: 2, desc: 'Сканирует состояние имплантов союзника, выявляет неисправности или взлом.' },
-  { name: 'Личный дрон',         class: 'Техник',      dpCost: 1, desc: 'Компактный дрон: разведка или отвлечение. Действует в твой ход как малое действие.' },
-  { name: 'Перенос перегруза',   class: 'Техник',      dpCost: 2, desc: 'Часть технической цены переводится в STRESS вместо потери ресурса.' },
-  { name: 'Уверенный пилот',     class: 'Пилот',       dpCost: 1, desc: '+2 к проверкам Вождения/Пилотирования при опасных манёврах.' },
-  { name: 'Боевой разворот',     class: 'Пилот',       dpCost: 2, desc: 'Как малое действие: резкий манёвр, враги делают проверку или теряют действие.' },
-  { name: 'Толпа слушает',       class: 'Агитатор',    dpCost: 1, desc: '+2 к Исполнению в публичных сценах.' },
-  { name: 'Заражающий нарратив', class: 'Агитатор',    dpCost: 2, desc: 'Убедительная речь — цель делает WIL DC 14 или меняет приоритет.' },
-  { name: 'Сделка дня',          class: 'Фиксер',      dpCost: 1, desc: '+2 к Торговле при первой сделке сессии.' },
-  { name: 'Призрачный маршрут',  class: 'Курьер',      dpCost: 2, desc: 'Снижает Heat на 1 после скрытного отхода.' },
+  { name: 'Прицельная очередь', class: 'Штурм', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '1 раз за раунд +2 к урону автоогнём; Heat +1.' },
+  { name: 'Рывок под огнём', class: 'Штурм', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Игнор первой реактивной опасности при смене укрытия.' },
+  { name: 'Жёсткая стойка', class: 'Штурм', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '+2 DEF против первой атаки каждого боя.' },
+  { name: 'Штурмовой вход', class: 'Штурм', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Штурма', desc: 'Если начинаешь ход в укрытии и идёшь ближе к врагу, получаешь +2 к первой атаке.' },
+  { name: 'Комнатная мясорубка', class: 'Штурм', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Штурма', desc: 'Дробовики и ПП получают +1 к ближнему урону.' },
+  { name: 'Подавляющий ритм', class: 'Штурм', tier: 'Продвинутый', dpCost: 3, prereq: 'Прицельная очередь', desc: 'Подавление дополнительно накладывает Подавлен.' },
+  { name: 'Личный протокол войны', class: 'Штурм', tier: 'Глубокий', dpCost: 4, prereq: '2 скила Штурма', desc: '1 раз за сцену получаешь дополнительное малое действие.' },
+  { name: 'Невозможный угол', class: 'Штурм', tier: 'Глубокий', dpCost: 4, prereq: '2 скила Штурма', desc: 'Игнорируешь лёгкое укрытие и часть штрафов стрельбы.' },
+  { name: 'Красная зона', class: 'Штурм', tier: 'Экзотичный', dpCost: 5, prereq: '3 скила Штурма, уровень 4+', desc: 'Пока HP ниже половины, +2 к атакам вблизи; после сцены 2 STRESS.' },
+
+  { name: 'Тихий профиль', class: 'Скрытность', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '1 раз за сцену преимущество на Скрытность.' },
+  { name: 'Слепое пятно', class: 'Скрытность', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '+2 против камер и дешёвых сенсоров.' },
+  { name: 'Мягкий шаг', class: 'Скрытность', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Игнорируешь мелкие шумовые штрафы.' },
+  { name: 'Вторая кожа', class: 'Скрытность', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Скрытности', desc: 'Провал Скрытности можно превратить в успех с ценой.' },
+  { name: 'Разрыв контакта', class: 'Скрытность', tier: 'Продвинутый', dpCost: 3, prereq: 'Тихий профиль', desc: 'После атаки смещаешься на 1 дистанцию.' },
+  { name: 'Призрачный маршрут', class: 'Скрытность', tier: 'Продвинутый', dpCost: 3, prereq: '2 скила Скрытности', desc: 'После сцены можешь снизить Heat на 1, если скрывал следы.' },
+  { name: 'Удар из пустоты', class: 'Скрытность', tier: 'Глубокий', dpCost: 4, prereq: 'Вторая кожа', desc: 'Первая атака из скрытности наносит +1d4 урона.' },
+  { name: 'Чужое лицо', class: 'Скрытность', tier: 'Глубокий', dpCost: 4, prereq: '2 скила Скрытности', desc: 'Временно меняешь биометрию и поведение.' },
+  { name: 'Нулевой силуэт', class: 'Скрытность', tier: 'Экзотичный', dpCost: 5, prereq: '3 скила Скрытности, уровень 4+', desc: '1 раз за миссию исчезаешь из обычного наблюдения на короткую сцену; Heat +1.' },
+
+  { name: 'Базовый порт', class: 'Сеть', tier: 'Базовый', dpCost: 2, prereq: 'Навык Взлом Обучен+', desc: 'RAM 2 и доступ к хакам 1 RAM.' },
+  { name: 'Быстрый пинг', class: 'Сеть', tier: 'Базовый', dpCost: 2, prereq: 'Базовый порт', desc: 'Ping не требует действия вне боя.' },
+  { name: 'Тихий логин', class: 'Сеть', tier: 'Базовый', dpCost: 2, prereq: 'Базовый порт', desc: 'Первое сетевое действие сцены не повышает Heat.' },
+  { name: 'Расширенная RAM', class: 'Сеть', tier: 'Продвинутый', dpCost: 3, prereq: 'Базовый порт', desc: '+1 RAM.' },
+  { name: 'Боевой эксплойт', class: 'Сеть', tier: 'Продвинутый', dpCost: 3, prereq: 'Расширенная RAM', desc: 'Открывает хаки 2 RAM.' },
+  { name: 'Мягкий доступ', class: 'Сеть', tier: 'Продвинутый', dpCost: 3, prereq: 'Боевой эксплойт', desc: 'При успешном хаке даёт дополнительный небросковый эффект.' },
+  { name: 'Каскадный пакет', class: 'Сеть', tier: 'Глубокий', dpCost: 4, prereq: 'Боевой эксплойт', desc: 'За 1 дополнительную RAM переносишь простой эффект на вторую цель.' },
+  { name: 'Чёрный маршрут', class: 'Сеть', tier: 'Глубокий', dpCost: 4, prereq: 'Боевой эксплойт, уровень 5+', desc: 'Открывает чёрные хаки 3 RAM.' },
+  { name: 'Слепая зона', class: 'Сеть', tier: 'Глубокий', dpCost: 4, prereq: 'Тихий логин или Чёрный маршрут', desc: '1 раз за сцену скрываешь цифровое присутствие группы.' },
+  { name: 'Ядро вторжения', class: 'Сеть', tier: 'Экзотичный', dpCost: 5, prereq: 'Чёрный маршрут, уровень 6+', desc: 'Открывает хаки 4 RAM.' },
+  { name: 'Разогнанный стек', class: 'Сеть', tier: 'Экзотичный', dpCost: 5, prereq: 'Ядро вторжения', desc: 'Снижаешь стоимость 1 хака на 1 RAM, но получаешь 1d4 STRESS.' },
+  { name: 'Чёрный мост', class: 'Сеть', tier: 'Культовый', dpCost: 6, prereq: '2 глубоких скила Сети, уровень 8+', desc: '+1 RAM и доступ к чёрным хакам вне обычных ограничений; критошибка требует WIL DC 16.' },
+
+  { name: 'Полевой ремонт', class: 'Инженерия', tier: 'Базовый', dpCost: 2, prereq: 'Навык Ремонт или Электроника Обучен+', desc: 'Действием чинишь простое устройство.' },
+  { name: 'Импровизированный модуль', class: 'Инженерия', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '1 раз за сцену собираешь малый гаджет.' },
+  { name: 'Понимание схем', class: 'Инженерия', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '+2 к анализу техники.' },
+  { name: 'Тех-апгрейд', class: 'Инженерия', tier: 'Продвинутый', dpCost: 3, prereq: 'Полевой ремонт', desc: 'Улучшенная техника дешевле по крафту.' },
+  { name: 'Подрывник', class: 'Инженерия', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Инженерии', desc: '+2 к зарядам, минам, тех-саботажу.' },
+  { name: 'Модульная сборка', class: 'Инженерия', tier: 'Продвинутый', dpCost: 3, prereq: 'Импровизированный модуль', desc: 'Между сценами перестраиваешь оружие или модуль.' },
+  { name: 'Каскадный отказ', class: 'Инженерия', tier: 'Глубокий', dpCost: 4, prereq: 'Подрывник', desc: 'Ломая один узел системы, вредишь связанному соседнему.' },
+  { name: 'Умная мастерская', class: 'Инженерия', tier: 'Глубокий', dpCost: 4, prereq: 'Тех-апгрейд', desc: 'Во время отдыха собираешь редкий модуль.' },
+  { name: 'Боевой конструктор', class: 'Инженерия', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Инженерии, уровень 5+', desc: '1 раз за миссию создаёшь одноразовый сильный тех-эффект.' },
+
+  { name: 'Стабильная рука', class: 'Хирургия', tier: 'Базовый', dpCost: 2, prereq: 'Навык Медицина Обучен+', desc: '+2 к стабилизации и полевой медицине.' },
+  { name: 'Мед-узел', class: 'Хирургия', tier: 'Базовый', dpCost: 2, prereq: 'Навык Медицина Обучен+', desc: '1 раз за сцену восстанавливаешь 1d6 HP союзнику.' },
+  { name: 'Диагностика', class: 'Хирургия', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Быстро считываешь импланты и травмы.' },
+  { name: 'Боевая медицина', class: 'Хирургия', tier: 'Продвинутый', dpCost: 3, prereq: 'Стабильная рука', desc: 'Лечишь без помех в бою.' },
+  { name: 'Нейрохимия', class: 'Хирургия', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Хирургии', desc: 'Доступ к стимам и антишоку.' },
+  { name: 'Грязная хирургия', class: 'Хирургия', tier: 'Продвинутый', dpCost: 3, prereq: 'Диагностика', desc: 'Ставишь и снимаешь импланты в плохих условиях.' },
+  { name: 'Перегон импланта', class: 'Хирургия', tier: 'Глубокий', dpCost: 4, prereq: 'Грязная хирургия', desc: 'Временно усиливаешь имплант цели или свой.' },
+  { name: 'Редактор боли', class: 'Хирургия', tier: 'Глубокий', dpCost: 4, prereq: 'Нейрохимия', desc: 'Цель игнорирует Ранен до конца сцены, потом теряет 1d4 STRESS.' },
+  { name: 'Второе сердце', class: 'Хирургия', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Хирургии, уровень 5+', desc: '1 раз за миссию поднимаешь цель с 0 HP до 1 HP без потери следующего хода.' },
+
+  { name: 'Сделка дня', class: 'Влияние', tier: 'Базовый', dpCost: 2, prereq: 'Навык Переговоры или Убеждение Обучен+', desc: '1 раз за сцену снижаешь цену или риск после соцуспеха.' },
+  { name: 'Чтение мотива', class: 'Влияние', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Задаёшь 1 вопрос о слабости NPC.' },
+  { name: 'Свой человек', class: 'Влияние', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Объявляешь разумный контакт.' },
+  { name: 'Толпа слушает', class: 'Влияние', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Влияния', desc: 'Сдвигаешь настроение группы NPC на 1 ступень.' },
+  { name: 'Тонкий нажим', class: 'Влияние', tier: 'Продвинутый', dpCost: 3, prereq: 'Сделка дня', desc: 'Можешь заменить рост Heat ростом долга.' },
+  { name: 'Район говорит', class: 'Влияние', tier: 'Продвинутый', dpCost: 3, prereq: 'Свой человек', desc: 'В знакомой среде +2 к соцпроверкам.' },
+  { name: 'Сеть обязательств', class: 'Влияние', tier: 'Глубокий', dpCost: 4, prereq: '2 скила Влияния', desc: 'Можешь требовать опасные услуги от контактов.' },
+  { name: 'Перекройка слухов', class: 'Влияние', tier: 'Глубокий', dpCost: 4, prereq: 'Толпа слушает', desc: 'Запускаешь локальную легенду или компромат.' },
+  { name: 'Живой символ', class: 'Влияние', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Влияния, уровень 5+', desc: '1 раз за миссию превращаешь нейтральную группу в временных союзников.' },
+
+  { name: 'Быстрая команда', class: 'Командование', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Союзник получает +2 к следующему действию.' },
+  { name: 'Распределение углов', class: 'Командование', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '+2 DEF союзнику при смене укрытия.' },
+  { name: 'Холодный расчёт', class: 'Командование', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '1 раз за сцену группа получает +2 INIT.' },
+  { name: 'Окно штурма', class: 'Командование', tier: 'Продвинутый', dpCost: 3, prereq: 'Быстрая команда', desc: 'Два союзника могут синхронно действовать.' },
+  { name: 'Сбор силы', class: 'Командование', tier: 'Продвинутый', dpCost: 3, prereq: '1 базовый скил Командования', desc: 'Помощники, фанаты и наймиты полезнее.' },
+  { name: 'Контроль темпа', class: 'Командование', tier: 'Продвинутый', dpCost: 3, prereq: 'Холодный расчёт', desc: 'Следование плану даёт бонусы.' },
+  { name: 'Боевой сценарий', class: 'Командование', tier: 'Глубокий', dpCost: 4, prereq: '2 скила Командования', desc: 'Заранее объявленный план даёт бонус группе на первый раунд.' },
+  { name: 'Резервный канал', class: 'Командование', tier: 'Глубокий', dpCost: 4, prereq: 'Окно штурма', desc: 'Снимаешь Подавлен с союзника раз в сцену.' },
+  { name: 'Тактическая сетка', class: 'Командование', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Командования, уровень 5+', desc: 'Кратко усиливаешь всю сцену, но Heat +1 и STRESS -1d4.' },
+
+  { name: 'Личный дрон', class: 'Дроны', tier: 'Базовый', dpCost: 2, prereq: 'Навык Дроны Обучен+ или пакет Сборщик дронов', desc: 'Получаешь стандартный развед- или сервис-дрон.' },
+  { name: 'Удалённая команда', class: 'Дроны', tier: 'Базовый', dpCost: 2, prereq: 'Личный дрон', desc: 'Управление дроном требует меньше действий.' },
+  { name: 'Полевой uplink', class: 'Дроны', tier: 'Базовый', dpCost: 2, prereq: 'Личный дрон', desc: 'Дрон даёт +2 к связанному действию.' },
+  { name: 'Шок-дрон', class: 'Дроны', tier: 'Продвинутый', dpCost: 3, prereq: 'Личный дрон', desc: 'Доступ к боевому дрону низкого уровня.' },
+  { name: 'Синхронизация роя', class: 'Дроны', tier: 'Продвинутый', dpCost: 3, prereq: 'Удалённая команда', desc: 'Два дрона действуют согласованно.' },
+  { name: 'Живая ретрансляция', class: 'Дроны', tier: 'Продвинутый', dpCost: 3, prereq: 'Полевой uplink', desc: 'Дроны помогают взлому и разведке.' },
+  { name: 'Ударный корпус', class: 'Дроны', tier: 'Глубокий', dpCost: 4, prereq: 'Шок-дрон', desc: 'Доступ к тяжёлому дрону.' },
+  { name: 'Экстренная переброска', class: 'Дроны', tier: 'Глубокий', dpCost: 4, prereq: 'Живая ретрансляция', desc: 'Дрон может пронести стим, предмет или модуль через опасную зону.' },
+  { name: 'Рой-пастырь', class: 'Дроны', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Дронов, уровень 5+', desc: '1 раз за миссию управляешь несколькими дронами как общей угрозой.' },
+
+  { name: 'Уверенный пилот', class: 'Транспорт', tier: 'Базовый', dpCost: 2, prereq: 'Навык Вождение или Пилотирование Обучен+', desc: '+2 к вождению в опасной ситуации.' },
+  { name: 'Знание маршрутов', class: 'Транспорт', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Можешь искать безопасный путь.' },
+  { name: 'Боевой разворот', class: 'Транспорт', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Игнорируешь первый штраф манёвра.' },
+  { name: 'Призрачный проезд', class: 'Транспорт', tier: 'Продвинутый', dpCost: 3, prereq: 'Уверенный пилот', desc: '+2 к уходу от преследования в городе.' },
+  { name: 'Контрабандный отсек', class: 'Транспорт', tier: 'Продвинутый', dpCost: 3, prereq: 'Знание маршрутов', desc: 'Транспорт скрывает груз, людей и хром.' },
+  { name: 'Водитель удара', class: 'Транспорт', tier: 'Продвинутый', dpCost: 3, prereq: 'Боевой разворот', desc: 'Эффективнее используешь таран.' },
+  { name: 'Слепой туннель', class: 'Транспорт', tier: 'Глубокий', dpCost: 4, prereq: 'Призрачный проезд', desc: 'Уходишь из погони ценой поломки, топлива или Heat.' },
+  { name: 'Городской призрак', class: 'Транспорт', tier: 'Глубокий', dpCost: 4, prereq: 'Знание маршрутов и Призрачный проезд', desc: 'Твоё перемещение крайне трудно отследить.' },
+  { name: 'Последний марш-бросок', class: 'Транспорт', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Транспорта, уровень 5+', desc: 'Транспорт доживает до конца сцены после критических повреждений.' },
+
+  { name: 'Адаптация к хрому', class: 'Импланты', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: '+1 к лимиту имплантов.' },
+  { name: 'Снижение отторжения', class: 'Импланты', tier: 'Базовый', dpCost: 2, prereq: 'Нет', desc: 'Первая побочка импланта сцены игнорируется.' },
+  { name: 'Калибровка тела', class: 'Импланты', tier: 'Базовый', dpCost: 2, prereq: '1 установленный имплант', desc: '1 раз за сцену +2 к проверке, связанной с имплантом.' },
+  { name: 'Глубокий разъём', class: 'Импланты', tier: 'Продвинутый', dpCost: 3, prereq: 'Адаптация к хрому', desc: 'Импланты работают быстрее и чище.' },
+  { name: 'Живой интерфейс', class: 'Импланты', tier: 'Продвинутый', dpCost: 3, prereq: 'Калибровка тела, Базовый порт или имплант-сеть', desc: 'Имплант и хак могут усиливать друг друга.' },
+  { name: 'Холодная плоть', class: 'Импланты', tier: 'Продвинутый', dpCost: 3, prereq: 'Снижение отторжения', desc: '+2 к сопротивлению боли и шоку.' },
+  { name: 'Перенос перегруза', class: 'Импланты', tier: 'Глубокий', dpCost: 4, prereq: 'Глубокий разъём', desc: 'Штраф от перегруза можно переводить в STRESS.' },
+  { name: 'Серийная интеграция', class: 'Импланты', tier: 'Глубокий', dpCost: 4, prereq: 'Адаптация к хрому и 2 импланта', desc: 'Держишь больше модулей одновременно.' },
+  { name: 'Плоть как платформа', class: 'Импланты', tier: 'Экзотичный', dpCost: 5, prereq: '2 глубоких скила Имплантов, уровень 5+', desc: 'Экзотичный имплант не занимает обычный слот, но даёт постоянную побочку.' },
+  { name: 'Хромированное чудовище', class: 'Импланты', tier: 'Культовый', dpCost: 6, prereq: 'Серийная интеграция, уровень 8+', desc: 'Ломаешь лимит тела, но ухудшаешь скрытность, эмпатию или ментальную стабильность.' },
+];
+
+const HACKS = [
+  { id: 'ping', name: 'Ping', ram: 1, effect: 'Показывает узлы, устройства и сенсоры.' },
+  { id: 'target_mark', name: 'Target Mark', ram: 1, effect: '+2 к первой атаке союзников по цели.' },
+  { id: 'sensor_blur', name: 'Sensor Blur', ram: 1, effect: 'Камера или сенсор теряет точность.' },
+  { id: 'ghost_hand', name: 'Ghost Hand', ram: 1, effect: 'Открывает простую дверь или панель.' },
+  { id: 'social_scrape', name: 'Social Scrape', ram: 1, effect: 'Читает слабость или интерес NPC.' },
+  { id: 'med_ping', name: 'Med Ping', ram: 1, effect: 'Анализирует тело и импланты.' },
+  { id: 'jam_channel', name: 'Jam Channel', ram: 1, effect: 'Ломает координацию цели.' },
+  { id: 'weapon_overload', name: 'Weapon Overload', ram: 2, effect: 'Оружие или имплант цели сбоит.' },
+  { id: 'crowd_feed', name: 'Crowd Feed', ram: 2, effect: 'Меняет реакцию массы.' },
+  { id: 'false_route', name: 'False Route', ram: 2, effect: 'Меняет маршрут патруля, дрона или авто.' },
+  { id: 'firewall_spike', name: 'Firewall Spike', ram: 2, effect: 'Дроны и турели получают помеху.' },
+  { id: 'credit_shuffle', name: 'Credit Shuffle', ram: 2, effect: 'Путает или задерживает транзакцию.' },
+  { id: 'neuro_tap', name: 'Neuro Tap', ram: 2, effect: '1d4 STRESS или нейроанализ.' },
+  { id: 'exit_window', name: 'Exit Window', ram: 2, effect: 'Снижает Heat на 1 при цифровом отходе.' },
+  { id: 'puppet_drone', name: 'Puppet Drone', ram: 3, effect: 'Перехват дрона или турели.' },
+  { id: 'blackout_bubble', name: 'Blackout Bubble', ram: 3, effect: 'Гасит локальную сеть света и сенсоров.' },
+  { id: 'reputation_leak', name: 'Reputation Leak', ram: 3, effect: 'Запускает компромат или легенду.' },
+  { id: 'pain_editor', name: 'Pain Editor', ram: 3, effect: 'Цель игнорирует Ранен до конца сцены.' },
+  { id: 'lockdown', name: 'Lockdown', ram: 3, effect: 'Блокирует двери и лифты.' },
+  { id: 'stack_collapse', name: 'Stack Collapse', ram: 3, effect: 'Цель с имплантом получает 1d6 STRESS.' },
+  { id: 'pursuit_jam', name: 'Pursuit Jam', ram: 3, effect: 'Ломает навигацию преследователя.' },
+  { id: 'ghost_city', name: 'Ghost City', ram: 4, effect: 'Группа исчезает из городской сети.' },
+  { id: 'kill_switch', name: 'Kill Switch', ram: 4, effect: 'Мощный имплант или тяжёлый дрон выключается.' },
+  { id: 'mob_trigger', name: 'Mob Trigger', ram: 4, effect: 'Толпа впадает в хаос.' },
+  { id: 'hostile_rewrite', name: 'Hostile Rewrite', ram: 4, effect: 'Переписывает поведение автономной системы.' },
+  { id: 'emergency_rewrite', name: 'Emergency Rewrite', ram: 4, effect: 'Цель с 0 HP встаёт на 1 HP.' },
+  { id: 'corp_scandal_burst', name: 'Corporate Scandal Burst', ram: 4, effect: 'Бьёт по репутации фракции.' },
+  { id: 'ghost_burn', name: 'Ghost Burn', ram: 3, effect: 'Чёрный хак. Требует особого доступа.' },
+  { id: 'seizure_spike', name: 'Seizure Spike', ram: 3, effect: 'Чёрный хак. Нейрошок цели.' },
+  { id: 'memory_salt', name: 'Memory Salt', ram: 4, effect: 'Чёрный хак. Искажение памяти.' },
+  { id: 'dead_choir', name: 'Dead Choir', ram: 4, effect: 'Чёрный хак. Токсичный резонанс сигнала.' },
+];
+
+const WEAPONS = [
+  { id: 'main_standard_weapon', name: 'Стандартное основное оружие', kind: 'main', source: 'Пакет Уличный наёмник', desc: 'Стартовое основное оружие из пакета подготовки.' },
+  { id: 'side_weapon', name: 'Побочное оружие', kind: 'side', source: 'Стартовый комплект', desc: 'Вторичное оружие персонажа.' },
+  { id: 'cable_parasite', name: 'Кабель-паразит', kind: 'utility', source: 'Пакет Сетевой беглец', desc: 'Инструмент для физического подключения и взлома.' },
+  { id: 'decoder', name: 'Дешифратор', kind: 'utility', source: 'Пакет Подпольный техник', desc: 'Сетевой и технический инструмент для обхода защиты.' },
+];
+
+const ARMORS = [
+  { id: 'light_armor', name: 'Лёгкая броня', def: 1, note: 'Без штрафа.' },
+  { id: 'medium_armor', name: 'Средняя броня', def: 2, note: 'Заметна.' },
+  { id: 'heavy_armor', name: 'Тяжёлая броня', def: 3, note: 'Помеха на Скрытность.' },
+  { id: 'exo_frame', name: 'Экзо-рама', def: 4, note: 'Требует силы, питания или хрома.' },
+];
+
+const IMPLANTS = [
+  { id: 'starter_implant', name: 'Стартовый имплант', quality: 'Стандартное', slots: 1, desc: '1 имплант стандартного качества из стартового комплекта.' },
+  { id: 'bad_implant_a', name: 'Плохой имплант A', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
+  { id: 'bad_implant_b', name: 'Плохой имплант B', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
+];
 ];
 
 const KIT_LABELS = {
@@ -173,6 +313,9 @@ let selectedDevskills = [];
 let savedChars = [];
 let currentCharIndex = -1;
 let upgradeChar = null;
+let inventoryModal = null;
+let invCurrentTab = 'weapons';
+let invCharIdx = -1;
 
 // ======= STORAGE =======
 function saveToStorage() {
@@ -329,7 +472,7 @@ function renderDevskills() {
         <span class="devskill-name">${ds.name}</span>
         <span class="devskill-class">${ds.class}</span>
       </div>
-      <div class="devskill-desc">${ds.desc}</div>
+      <div class="devskill-desc">${ds.desc}</div><div class="devskill-meta">${ds.tier || 'Базовый'} · ${ds.dpCost} DP${ds.prereq ? ' · Требует: ' + ds.prereq : ''}</div>
     </div>`;
   }).join('');
   document.getElementById('devskills-count').textContent = `Выбрано: ${selectedDevskills.length} / 2`;
@@ -454,6 +597,9 @@ function saveCharacter() {
     skillRanks: derivedSkillRanks,
     kitBonusSkills,
     devskills: selectedDevskills.map(n => ALL_DEVSKILLS.find(d=>d.name===n)).filter(Boolean),
+    inventory: { weapons: [], implants: [], armor: [] },
+    hacksKnown: [],
+    hacksPrepared: [],
     dp: 0,
     upgrades: [],
     createdAt: Date.now(),
@@ -574,7 +720,7 @@ function renderCharSheet(c) {
     </div>
     <div class="sheet-section">
       <h3>Скиллы развития</h3>
-      ${(c.devskills||[]).length ? (c.devskills||[]).map(ds=>`<div class="devskill-card selected compact"><div class="devskill-header"><span class="devskill-name">${ds.name}</span><span class="devskill-class">${ds.class}</span></div><div class="devskill-desc">${ds.desc}</div></div>`).join('') : '<em>нет скилов</em>'}
+      ${(c.devskills||[]).length ? (c.devskills||[]).map(ds=>`<div class="devskill-card selected compact"><div class="devskill-header"><span class="devskill-name">${ds.name}</span><span class="devskill-class">${ds.class}</span></div><div class="devskill-desc">${ds.desc}</div><div class="devskill-meta">${ds.tier || 'Базовый'} · ${ds.dpCost} DP${ds.prereq ? ' · Требует: ' + ds.prereq : ''}</div></div>`).join('') : '<em>нет скилов</em>'}
     </div>
     ${(c.upgrades&&c.upgrades.length) ? `<div class="sheet-section"><h3>История прокачки</h3><div class="upgrades-log">${c.upgrades.map(u=>`<div class="upgrade-log-entry">${u}</div>`).join('')}</div></div>` : ''}
     <div class="nav-buttons">
@@ -604,6 +750,7 @@ function openUpgradeModal() {
   renderUpgradeSkills();
   renderUpgradeStats();
   renderUpgradeDevskills();
+  renderUpgradeHacks();
   document.getElementById('upgrade-modal').classList.remove('hidden');
   switchUpgradeTab('skills', document.querySelector('.upgrade-tab'));
 }
@@ -618,7 +765,7 @@ function closeUpgradeModalOutside(e) {
 }
 
 function switchUpgradeTab(tab, btn) {
-  ['skills','stats','devskills'].forEach(t => {
+  ['skills','stats','devskills','hacks'].forEach(t => {
     document.getElementById('upgrade-tab-'+t).classList.add('hidden');
   });
   document.getElementById('upgrade-tab-'+tab).classList.remove('hidden');
@@ -721,6 +868,7 @@ function buyDevSkill(name, cost) {
   upgradeChar.upgrades.push(`Скил «${name}» куплен (−${cost}DP)`);
   document.getElementById('upgrade-dp-val').textContent = upgradeChar.dp;
   renderUpgradeDevskills();
+  renderUpgradeHacks();
 }
 
 function applyUpgrades() {
@@ -729,6 +877,139 @@ function applyUpgrades() {
   saveToStorage();
   closeUpgradeModal();
   renderCharSheet(savedChars[currentCharIndex]);
+}
+
+
+// ======= INVENTORY & HACKS =======
+function renderInventorySection(c) {
+  const inv = c.inventory || { weapons: [], implants: [], armor: [] };
+  const weapons = inv.weapons.length ? inv.weapons.map(id => WEAPONS.find(x=>x.id===id)?.name).filter(Boolean).map(n => `<span class="devskill-chip">⚔️ ${n}</span>`).join('') : '<em>нет</em>';
+  const implants = inv.implants.length ? inv.implants.map(id => IMPLANTS.find(x=>x.id===id)?.name).filter(Boolean).map(n => `<span class="devskill-chip">🔩 ${n}</span>`).join('') : '<em>нет</em>';
+  const armor = inv.armor.length ? inv.armor.map(id => ARMORS.find(x=>x.id===id)?.name).filter(Boolean).map(n => `<span class="devskill-chip">🛡 ${n}</span>`).join('') : '<em>нет</em>';
+  return `<div class="summary-row">Оружие: <span>${weapons}</span></div><div class="summary-row">Импланты: <span>${implants}</span></div><div class="summary-row">Броня: <span>${armor}</span></div>`;
+}
+
+function openInventory(charIdx) {
+  invCharIdx = charIdx;
+  const c = savedChars[charIdx];
+  if (!c.inventory) c.inventory = { weapons: [], implants: [], armor: [] };
+  let modal = document.getElementById('inventory-modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'inventory-modal';
+  modal.className = 'modal-overlay';
+  modal.onclick = e => { if (e.target === modal) closeInventoryModal(); };
+  modal.innerHTML = `
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Инвентарь персонажа">
+      <div class="modal-header"><span class="modal-title">🎒 Инвентарь</span><button class="modal-close" onclick="closeInventoryModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="upgrade-tabs">
+          <button class="upgrade-tab active" onclick="switchInventoryTab('weapons', this)">Оружие</button>
+          <button class="upgrade-tab" onclick="switchInventoryTab('implants', this)">Импланты</button>
+          <button class="upgrade-tab" onclick="switchInventoryTab('armor', this)">Броня</button>
+        </div>
+        <div id="inventory-content"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  invCurrentTab = 'weapons';
+  renderInventoryTab();
+}
+
+function closeInventoryModal() {
+  document.getElementById('inventory-modal')?.remove();
+  saveToStorage();
+  if (currentCharIndex >= 0) renderCharSheet(savedChars[currentCharIndex]);
+}
+
+function switchInventoryTab(tab, btn) {
+  invCurrentTab = tab;
+  document.querySelectorAll('#inventory-modal .upgrade-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInventoryTab();
+}
+
+function renderInventoryTab() {
+  const c = savedChars[invCharIdx];
+  if (!c) return;
+  const map = { weapons: WEAPONS, implants: IMPLANTS, armor: ARMORS };
+  const list = map[invCurrentTab] || [];
+  const selected = c.inventory?.[invCurrentTab] || [];
+  const usedImplants = (c.inventory?.implants || []).reduce((acc, id) => acc + (IMPLANTS.find(x=>x.id===id)?.slots || 0), 0);
+  const implLimit = calcDerivedFromChar(c).impl;
+  let top = '';
+  if (invCurrentTab === 'implants') top = `<div class="hint">Лимит имплантов: <strong>${usedImplants}/${implLimit}</strong></div>`;
+  document.getElementById('inventory-content').innerHTML = top + list.map(item => {
+    const active = selected.includes(item.id);
+    const meta = item.def ? `DEF +${item.def}` : (item.quality ? item.quality : (item.kind || 'предмет'));
+    const note = item.note || item.desc || item.source || '';
+    return `<div class="devskill-card ${active?'selected':''}" onclick="toggleInventoryItem('${invCurrentTab}','${item.id}')"><div class="devskill-header"><span class="devskill-name">${item.name}</span><span class="devskill-class">${meta}</span></div><div class="devskill-desc">${note}</div></div>`;
+  }).join('');
+}
+
+function toggleInventoryItem(tab, itemId) {
+  const c = savedChars[invCharIdx];
+  if (!c.inventory) c.inventory = { weapons: [], implants: [], armor: [] };
+  const arr = c.inventory[tab];
+  const idx = arr.indexOf(itemId);
+  if (idx >= 0) arr.splice(idx, 1);
+  else {
+    if (tab === 'armor') c.inventory.armor = [itemId];
+    else if (tab === 'implants') {
+      const nextCost = IMPLANTS.find(x=>x.id===itemId)?.slots || 0;
+      const used = c.inventory.implants.reduce((acc, id) => acc + (IMPLANTS.find(x=>x.id===id)?.slots || 0), 0);
+      const limit = calcDerivedFromChar(c).impl;
+      if (used + nextCost > limit) { alert('Превышен лимит имплантов.'); return; }
+      arr.push(itemId);
+    } else arr.push(itemId);
+  }
+  renderInventoryTab();
+}
+
+function renderHackList(ids, mode='known') {
+  const list = (ids || []).map(id => HACKS.find(h => h.id === id)).filter(Boolean);
+  if (!list.length) return '<em>нет</em>';
+  return list.map(h => `<span class="skill-chip ${mode==='prepared' ? 'rank-2' : 'rank-1'}">RAM ${h.ram}: ${h.name}</span>`).join('');
+}
+
+function openHacksEditor() {
+  if (currentCharIndex < 0) return;
+  openUpgradeModal();
+  switchUpgradeTab('hacks', document.querySelectorAll('.upgrade-tab')[3]);
+}
+
+function renderUpgradeHacks() {
+  const list = document.getElementById('upgrade-hacks-list');
+  if (!list || !upgradeChar) return;
+  if (!upgradeChar.hacksKnown) upgradeChar.hacksKnown = [];
+  if (!upgradeChar.hacksPrepared) upgradeChar.hacksPrepared = [];
+  list.innerHTML = HACKS.map(h => {
+    const known = upgradeChar.hacksKnown.includes(h.id);
+    const prepared = upgradeChar.hacksPrepared.includes(h.id);
+    return `<div class="skill-row"><span class="skill-name">${h.name} <small class="skill-base">[RAM ${h.ram}]</small><br><small class="skill-base">${h.effect}</small></span><div class="skill-controls"><label style="display:flex;gap:6px;align-items:center;"><input type="checkbox" ${known?'checked':''} onchange="toggleHackKnown('${h.id}', this.checked)"> знать</label><label style="display:flex;gap:6px;align-items:center;"><input type="checkbox" ${prepared?'checked':''} ${known?'':'disabled'} onchange="toggleHackPrepared('${h.id}', this.checked)"> готов</label></div></div>`;
+  }).join('');
+}
+
+function toggleHackKnown(id, checked) {
+  if (!upgradeChar.hacksKnown) upgradeChar.hacksKnown = [];
+  if (!upgradeChar.hacksPrepared) upgradeChar.hacksPrepared = [];
+  if (checked) {
+    if (!upgradeChar.hacksKnown.includes(id)) upgradeChar.hacksKnown.push(id);
+  } else {
+    upgradeChar.hacksKnown = upgradeChar.hacksKnown.filter(x => x !== id);
+    upgradeChar.hacksPrepared = upgradeChar.hacksPrepared.filter(x => x !== id);
+  }
+  renderUpgradeHacks();
+}
+
+function toggleHackPrepared(id, checked) {
+  if (!upgradeChar.hacksPrepared) upgradeChar.hacksPrepared = [];
+  if (checked) {
+    if (!upgradeChar.hacksPrepared.includes(id)) upgradeChar.hacksPrepared.push(id);
+  } else {
+    upgradeChar.hacksPrepared = upgradeChar.hacksPrepared.filter(x => x !== id);
+  }
+  renderUpgradeHacks();
 }
 
 // ======= EXPORT / IMPORT =======
