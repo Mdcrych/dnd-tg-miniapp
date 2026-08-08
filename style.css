@@ -732,6 +732,58 @@ button:hover {
 }
 .upgrade-tab-content.hidden { display: none; }
 
+/* === INVENTORY: SEARCH & RARITY FILTER === */
+.inv-search-input {
+  width: 100%;
+  background: var(--bg-deep);
+  border: 1px solid #0e2040;
+  color: var(--text);
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  font-family: 'Rajdhani', sans-serif;
+  margin-bottom: 0.6rem;
+}
+.inv-search-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,255,224,0.15); }
+.inv-search-input::placeholder { color: #2a4060; }
+
+.inv-filter-row { display: flex; gap: 0.35rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.inv-filter-chip {
+  background: var(--bg-deep);
+  border: 1px solid #0a1c30;
+  color: #2a4060;
+  border-radius: 12px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.68rem;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  transition: all 0.15s;
+}
+.inv-filter-chip:hover { border-color: rgba(0,255,224,0.35); color: rgba(0,255,224,0.7); }
+.inv-filter-chip.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,255,224,0.08);
+}
+
+.inv-rarity-group { margin-bottom: 0.9rem; }
+.inv-rarity-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-family: 'Share Tech Mono', monospace;
+  padding: 0.2rem 0;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid #0a1c30;
+}
+.inv-rarity-heading small { color: #2a4060; font-size: 0.68rem; text-transform: none; }
+.inv-rarity-heading.rarity-bad      { color: #5a7090; }
+.inv-rarity-heading.rarity-standard { color: var(--cyan); }
+.inv-rarity-heading.rarity-improved { color: #4dffb8; }
+.inv-rarity-heading.rarity-exotic   { color: var(--orange); }
+.inv-rarity-heading.rarity-cult     { color: var(--magenta); }
+
 /* === UPGRADE ROWS === */
 .upgrade-row {
   display: flex; align-items: center; justify-content: space-between;

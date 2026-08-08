@@ -214,24 +214,125 @@ const HACKS = [
   { id: 'dead_choir', name: 'Dead Choir', ram: 4, effect: 'Чёрный хак. Токсичный резонанс сигнала.' },
 ];
 
+const RARITY_LABELS = { bad: 'Плохое', standard: 'Стандартное', improved: 'Улучшенное', exotic: 'Экзотичное', cult: 'Культовое' };
+const RARITY_ORDER = ['bad', 'standard', 'improved', 'exotic', 'cult'];
+
+// Каталог снаряжения — Cyberpunk Rulebook v0.5, плейтестовый модуль (108 предметов: 36 оружия, 36 брони, 36 имплантов)
 const WEAPONS = [
-  { id: 'main_standard_weapon', name: 'Стандартное основное оружие', kind: 'main', source: 'Пакет Уличный наёмник', desc: 'Стартовое основное оружие из пакета подготовки.' },
-  { id: 'side_weapon', name: 'Побочное оружие', kind: 'side', source: 'Стартовый комплект', desc: 'Вторичное оружие персонажа.' },
-  { id: 'cable_parasite', name: 'Кабель-паразит', kind: 'utility', source: 'Пакет Сетевой беглец', desc: 'Инструмент для физического подключения и взлома.' },
-  { id: 'decoder', name: 'Дешифратор', kind: 'utility', source: 'Пакет Подпольный техник', desc: 'Сетевой и технический инструмент для обхода защиты.' },
+  { id: "w_samodelnyi_pistolet", name: "Самодельный пистолет", type: "Побочное", damage: "1d4", range: "Близко/средне", property: "Критический провал: Сломан", price: null, rarity: "bad" },
+  { id: "w_rzhavyi_revolver", name: "Ржавый револьвер", type: "Побочное", damage: "1d6", range: "Близко/средне", property: "Перезарядка требует малого действия", price: null, rarity: "bad" },
+  { id: "w_obrez", name: "Обрез", type: "Основное", damage: "1d6", range: "Близко", property: "На средней дистанции помеха", price: null, rarity: "bad" },
+  { id: "w_samopalnyi_pp", name: "Самопальный ПП", type: "Основное", damage: "1d6", range: "Близко", property: "Автоогонь: Heat +1 дополнительно", price: null, rarity: "bad" },
+  { id: "w_trubchatoe_ruzhe", name: "Трубчатое ружьё", type: "Основное", damage: "1d8", range: "Близко/средне", property: "После каждого выстрела перезарядка малым действием", price: null, rarity: "bad" },
+  { id: "w_odnorazovyi_shoker", name: "Одноразовый шокер", type: "Побочное", damage: "1d4 STRESS", range: "Вплотную", property: "После применения Сломан", price: null, rarity: "bad" },
+  { id: "w_armaturnaya_dubina", name: "Арматурная дубина", type: "Ближнее", damage: "1d4", range: "Вплотную", property: "Шумная: нельзя применять скрытно", price: null, rarity: "bad" },
+  { id: "w_zatochka_iz_metalloloma", name: "Заточка из металлолома", type: "Ближнее", damage: "1d4", range: "Вплотную", property: "Критический провал: оружие ломается", price: null, rarity: "bad" },
+  { id: "w_cep_s_gruzom", name: "Цепь с грузом", type: "Ближнее", damage: "1d4", range: "Вплотную", property: "Помеха против целей в надёжном укрытии", price: null, rarity: "bad" },
+  { id: "w_skladnoi_rezak", name: "Складной резак", type: "Ближнее", damage: "1d4", range: "Вплотную", property: "-1 к Ближнему бою, пока используется", price: null, rarity: "bad" },
+  { id: "w_pistolet_kobra", name: "Пистолет «Кобра»", type: "Побочное", damage: "1d6", range: "Близко/средне", property: "Надёжный", price: null, rarity: "standard" },
+  { id: "w_kompaktnyi_pistolet", name: "Компактный пистолет", type: "Побочное", damage: "1d4", range: "Близко", property: "Скрываемый", price: null, rarity: "standard" },
+  { id: "w_tyazhelyi_revolver", name: "Тяжёлый револьвер", type: "Побочное", damage: "1d8", range: "Близко/средне", property: "Перезарядка требует малого действия", price: null, rarity: "standard" },
+  { id: "w_pistolet_pulemet_strizh", name: "Пистолет-пулемёт «Стриж»", type: "Основное", damage: "1d6", range: "Близко", property: "Автоогонь", price: null, rarity: "standard" },
+  { id: "w_karabin_raion_7", name: "Карабин «Район-7»", type: "Основное", damage: "1d8", range: "Средне/далеко", property: "Универсальный", price: null, rarity: "standard" },
+  { id: "w_shturmovaya_vintovka_vektor", name: "Штурмовая винтовка «Вектор»", type: "Основное", damage: "1d8", range: "Средне/далеко", property: "Автоогонь", price: null, rarity: "standard" },
+  { id: "w_pompovyi_drobovik", name: "Помповый дробовик", type: "Основное", damage: "1d8", range: "Близко", property: "На близкой дистанции +1 к урону", price: null, rarity: "standard" },
+  { id: "w_ohotniche_ruzhe", name: "Охотничье ружьё", type: "Основное", damage: "1d10", range: "Средне/далеко", property: "Перезарядка требует малого действия", price: null, rarity: "standard" },
+  { id: "w_takticheskaya_dubinka", name: "Тактическая дубинка", type: "Ближнее", damage: "1d6", range: "Вплотную", property: "Крит: цель Подавлена", price: null, rarity: "standard" },
+  { id: "w_machete", name: "Мачете", type: "Ближнее", damage: "1d6", range: "Вплотную", property: "Бесшумное и прочное", price: null, rarity: "standard" },
+  { id: "w_umnyi_pistolet", name: "Умный пистолет", type: "Побочное", damage: "1d6", range: "Близко/средне", property: "+1 к первой атаке по отмеченной цели", price: null, rarity: "improved" },
+  { id: "w_besshumnyi_pistolet", name: "Бесшумный пистолет", type: "Побочное", damage: "1d6", range: "Близко/средне", property: "Не повышает Heat от одиночного выстрела", price: null, rarity: "improved" },
+  { id: "w_boevoi_pp", name: "Боевой ПП", type: "Основное", damage: "1d8", range: "Близко", property: "Автоогонь; компактный", price: null, rarity: "improved" },
+  { id: "w_takticheskii_drobovik", name: "Тактический дробовик", type: "Основное", damage: "1d10", range: "Близко", property: "Перезарядка малым действием не требуется раз за сцену", price: null, rarity: "improved" },
+  { id: "w_tochnaya_vintovka", name: "Точная винтовка", type: "Основное", damage: "1d10", range: "Далеко", property: "+1 к атаке с подготовленной позиции", price: null, rarity: "improved" },
+  { id: "w_probivnoi_karabin", name: "Пробивной карабин", type: "Основное", damage: "1d8", range: "Средне/далеко", property: "Игнорирует 1 DEF от брони", price: null, rarity: "improved" },
+  { id: "w_vibroklinok", name: "Виброклинок", type: "Ближнее", damage: "1d8", range: "Вплотную", property: "Игнорирует 1 DEF от брони", price: null, rarity: "improved" },
+  { id: "w_elektrodubinka", name: "Электродубинка", type: "Ближнее", damage: "1d6 + 1 STRESS", range: "Вплотную", property: "Крит: Оглушён", price: null, rarity: "improved" },
+  { id: "w_mononit", name: "Мононить", type: "Ближнее", damage: "1d8", range: "Вплотную", property: "Скрываемая; требуется осторожность", price: null, rarity: "improved" },
+  { id: "w_marksmanskaya_vintovka", name: "Марксманская винтовка", type: "Основное", damage: "1d10", range: "Далеко", property: "Крит добавляет 1d4 урона", price: null, rarity: "improved" },
+  { id: "w_relsovyi_pistolet", name: "Рельсовый пистолет", type: "Побочное", damage: "1d8", range: null, property: "Игнорирует лёгкое укрытие", price: "После выстрела Перегрет", rarity: "exotic" },
+  { id: "w_mikroraketnyi_kompleks", name: "Микроракетный комплекс", type: "Основное", damage: "2d6", range: null, property: "Зона поражения", price: "Heat +1 за применение", rarity: "exotic" },
+  { id: "w_neiroshoker", name: "Нейрошокер", type: "Побочное", damage: "1d6 STRESS", range: null, property: "Успех может наложить Оглушён", price: "Требует контакт или близкую дистанцию", rarity: "exotic" },
+  { id: "w_golos_voiny", name: "«Голос войны»", type: "Основное", damage: "2d8", range: null, property: "Автоогонь и подавление без штрафа", price: "После сцены Heat +2", rarity: "cult" },
+  { id: "w_poslednii_argument", name: "«Последний аргумент»", type: "Побочное", damage: "2d6", range: null, property: "Один выстрел за сцену; крит на 19–20", price: "После выстрела требуется сервис", rarity: "cult" },
+  { id: "w_pevec_provodov", name: "«Певец проводов»", type: "Ближнее", damage: "2d8", range: null, property: "Наносит HP и STRESS", price: "Требует имплант-интерфейс; Humanity -1", rarity: "cult" },
 ];
 
 const ARMORS = [
-  { id: 'light_armor', name: 'Лёгкая броня', def: 1, note: 'Без штрафа.' },
-  { id: 'medium_armor', name: 'Средняя броня', def: 2, note: 'Заметна.' },
-  { id: 'heavy_armor', name: 'Тяжёлая броня', def: 3, note: 'Помеха на Скрытность.' },
-  { id: 'exo_frame', name: 'Экзо-рама', def: 4, note: 'Требует силы, питания или хрома.' },
+  { id: "a_latannyi_bronezhilet", name: "Латанный бронежилет", class: "Лёгкая", def: "+1", property: "После критического попадания получает Сломан", price: null, rarity: "bad" },
+  { id: "a_kurtka_s_kevlarovymi_vstavkami", name: "Куртка с кевларовыми вставками", class: "Лёгкая", def: "+1", property: "-1 к социальным проверкам в корпоративной зоне", price: null, rarity: "bad" },
+  { id: "a_staraya_motobronya", name: "Старая мотоброня", class: "Лёгкая", def: "+1", property: "Шумная при беге", price: null, rarity: "bad" },
+  { id: "a_samodelnaya_plastina", name: "Самодельная пластина", class: "Лёгкая", def: "+1", property: "Помеха на Скрытность", price: null, rarity: "bad" },
+  { id: "a_rzhavyi_zhilet_ohrany", name: "Ржавый жилет охраны", class: "Средняя", def: "+2", property: "После погони требует обслуживания", price: null, rarity: "bad" },
+  { id: "a_kontrabandnyi_razgruz", name: "Контрабандный разгруз", class: "Средняя", def: "+2", property: "Привлекает внимание при досмотре", price: null, rarity: "bad" },
+  { id: "a_tyazhelyi_schitovoi_komplekt", name: "Тяжёлый щитовой комплект", class: "Тяжёлая", def: "+3", property: "Помеха на Скрытность и Акробатику", price: null, rarity: "bad" },
+  { id: "a_brakovannaya_silovaya_rama", name: "Бракованная силовая рама", class: "Экзо-рама", def: "+4", property: "Критический провал: Сломан", price: null, rarity: "bad" },
+  { id: "a_pressovannyi_pancir", name: "Прессованный панцирь", class: "Средняя", def: "+2", property: "Помеха на Переговоры с гражданскими", price: null, rarity: "bad" },
+  { id: "a_deshevyi_plasch_bronya", name: "Дешёвый плащ-броня", class: "Лёгкая", def: "+1", property: "Не защищает от первого попадания при внезапной атаке", price: null, rarity: "bad" },
+  { id: "a_gorodskaya_kurtka_s_kevlarom", name: "Городская куртка с кевларом", class: "Лёгкая", def: "+1", property: "Без штрафа", price: null, rarity: "standard" },
+  { id: "a_skrytyi_zhilet", name: "Скрытый жилет", class: "Лёгкая", def: "+1", property: "Не заметен при обычном досмотре", price: null, rarity: "standard" },
+  { id: "a_kurerskii_bronekostyum", name: "Курьерский бронекостюм", class: "Лёгкая", def: "+1", property: "Удобен для Акробатики", price: null, rarity: "standard" },
+  { id: "a_standartnyi_bronezhilet", name: "Стандартный бронежилет", class: "Средняя", def: "+2", property: "Заметен", price: null, rarity: "standard" },
+  { id: "a_takticheskii_razgruz", name: "Тактический разгруз", class: "Средняя", def: "+2", property: "Вмещает один дополнительный полезный предмет", price: null, rarity: "standard" },
+  { id: "a_bronepalto_fikserov", name: "Бронепальто фиксеров", class: "Средняя", def: "+2", property: "Не выглядит военной бронёй", price: null, rarity: "standard" },
+  { id: "a_ohrannyi_komplekt", name: "Охранный комплект", class: "Средняя", def: "+2", property: "Помогает выдать себя за охрану", price: null, rarity: "standard" },
+  { id: "a_shturmovoi_pancir", name: "Штурмовой панцирь", class: "Тяжёлая", def: "+3", property: "Помеха на Скрытность", price: null, rarity: "standard" },
+  { id: "a_komplekt_podavleniya", name: "Комплект подавления", class: "Тяжёлая", def: "+3", property: "Раз за сцену игнорирует Подавлен", price: null, rarity: "standard" },
+  { id: "a_rabochaya_ekzo_rama", name: "Рабочая экзо-рама", class: "Экзо-рама", def: "+4", property: "Требует силы, питания или хрома", price: null, rarity: "standard" },
+  { id: "a_skrytnyi_bronekostyum", name: "Скрытный бронекостюм", class: "Средняя", def: "+2", property: "Не даёт помеху на Скрытность", price: null, rarity: "improved" },
+  { id: "a_takticheskaya_plastina", name: "Тактическая пластина", class: "Тяжёлая", def: "+3", property: "Раз за сцену игнорирует Ранен", price: null, rarity: "improved" },
+  { id: "a_plasch_sensoropodavitel", name: "Плащ-сенсороподавитель", class: "Лёгкая", def: "+1", property: "+2 против камер и дешёвых сенсоров", price: null, rarity: "improved" },
+  { id: "a_shturmovoi_komplekt_blok", name: "Штурмовой комплект «Блок»", class: "Тяжёлая", def: "+3", property: "+2 против захвата и тарана", price: null, rarity: "improved" },
+  { id: "a_usilennaya_ekzo_rama", name: "Усиленная экзо-рама", class: "Экзо-рама", def: "+4", property: "+2 к Атлетике при силовых действиях", price: null, rarity: "improved" },
+  { id: "a_medicinskii_bronekostyum", name: "Медицинский бронекостюм", class: "Средняя", def: "+2", property: "+2 к стабилизации раненого", price: null, rarity: "improved" },
+  { id: "a_kurerskaya_skolzyaschaya_bronya", name: "Курьерская скользящая броня", class: "Средняя", def: "+2", property: "Раз за сцену игнорирует помеху от преследования", price: null, rarity: "improved" },
+  { id: "a_protivogazovyi_pancir", name: "Противогазовый панцирь", class: "Средняя", def: "+2", property: "Преимущество против газа и дыма", price: null, rarity: "improved" },
+  { id: "a_bronya_svyazista", name: "Броня связиста", class: "Лёгкая", def: "+1", property: "Защищает носимый сетевой инструмент от первого сбоя", price: null, rarity: "improved" },
+  { id: "a_sapernyi_komplekt", name: "Сапёрный комплект", class: "Тяжёлая", def: "+3", property: "+2 против взрывов; помеха на Скрытность", price: null, rarity: "improved" },
+  { id: "a_reaktivnaya_bronya", name: "Реактивная броня", class: "Тяжёлая", def: "+3", property: "Реакцией снижает урон на 1d6", price: "Затем Перегрет", rarity: "exotic" },
+  { id: "a_mask_kostyum", name: "Маск-костюм", class: "Средняя", def: "+2", property: "Преимущество на одну Скрытность за сцену", price: "Камеры могут отметить аномалию", rarity: "exotic" },
+  { id: "a_shturmovaya_ekzo_rama", name: "Штурмовая экзо-рама", class: "Экзо-рама", def: "+4", property: "Игнорирует лёгкое укрытие при таране", price: "Heat +1 при активации", rarity: "exotic" },
+  { id: "a_bastion_nulya", name: "«Бастион Нуля»", class: "Экзо-рама", def: "+4", property: "Раз за сцену получает ещё +4 DEF до следующего хода", price: "STRESS -1d4 после сцены", rarity: "cult" },
+  { id: "a_svyataya_obolochka", name: "«Святая оболочка»", class: "Экзо-рама", def: "+4", property: "Игнорирует первый критический эффект сцены", price: "Внимание фракций и Heat +1", rarity: "cult" },
+  { id: "a_kozha_megapolisa", name: "«Кожа мегаполиса»", class: "Средняя", def: "+3", property: "Сливается с городской инфраструктурой: +2 к уходу от погони", price: "Требует сетевую связь; уязвима к Рассинхрону", rarity: "cult" },
 ];
 
 const IMPLANTS = [
-  { id: 'starter_implant', name: 'Стартовый имплант', quality: 'Стандартное', slots: 1, desc: '1 имплант стандартного качества из стартового комплекта.' },
-  { id: 'bad_implant_a', name: 'Плохой имплант A', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
-  { id: 'bad_implant_b', name: 'Плохой имплант B', quality: 'Плохое', slots: 1, desc: 'Один из двух плохих стартовых имплантов.' },
+  { id: "i_drozhaschii_pricel", name: "Дрожащий прицел", slots: "1", effect: "+1 к Стрельбе с подготовленной позиции", drawback: "Критический провал: помеха к следующей атаке", price: null, rarity: "bad" },
+  { id: "i_ulichnyi_neiroport", name: "Уличный нейропорт", slots: "1", effect: "Физическое подключение к устройствам", drawback: "Уязвим к сетевым атакам", price: null, rarity: "bad" },
+  { id: "i_ruka_protez", name: "Рука-протез", slots: "1", effect: "Базовые манипуляции и удержание предметов", drawback: "-1 к тонкой моторике", price: null, rarity: "bad" },
+  { id: "i_deshevyi_refleks_buster", name: "Дешёвый рефлекс-бустер", slots: "1", effect: "+1 INIT", drawback: "После применения STRESS -1", price: null, rarity: "bad" },
+  { id: "i_sboinyi_kiberglaz", name: "Сбойный киберглаз", slots: "1", effect: "Видит в темноте на близкой дистанции", drawback: "Помеха в ярком свете", price: null, rarity: "bad" },
+  { id: "i_podkozhnaya_setka", name: "Подкожная сетка", slots: "1", effect: "DEF +1 против первого попадания сцены", drawback: "После срабатывания отключается", price: null, rarity: "bad" },
+  { id: "i_stim_regulyator", name: "Стим-регулятор", slots: "1", effect: "Игнорирует Ранен на один ход", drawback: "Затем STRESS -1d4", price: null, rarity: "bad" },
+  { id: "i_paket_pamyati", name: "Пакет памяти", slots: "1", effect: "Записывает разговор или изображение", drawback: "Данные уязвимы к взлому", price: null, rarity: "bad" },
+  { id: "i_legkie_filtry", name: "Лёгкие-фильтры", slots: "1", effect: "Преимущество против дыма и газа", drawback: "Шумное дыхание при нагрузке", price: null, rarity: "bad" },
+  { id: "i_kostnyi_fiksator", name: "Костный фиксатор", slots: "1", effect: "+1 к Атлетике при захвате", drawback: "Помеха к Акробатике", price: null, rarity: "bad" },
+  { id: "i_kiberglaz", name: "Киберглаз", slots: "1", effect: "+2 к Внимательности при поиске деталей", drawback: null, price: null, rarity: "standard" },
+  { id: "i_neiroport", name: "Нейропорт", slots: "1", effect: "Безопасное подключение к устройствам и сетям", drawback: null, price: null, rarity: "standard" },
+  { id: "i_refleks_buster", name: "Рефлекс-бустер", slots: "1", effect: "+2 INIT раз за сцену", drawback: null, price: null, rarity: "standard" },
+  { id: "i_podkozhnaya_bronya", name: "Подкожная броня", slots: "1", effect: "DEF +1; не занимает слот брони", drawback: null, price: null, rarity: "standard" },
+  { id: "i_med_uzel", name: "Мед-узел", slots: "1", effect: "Раз за сцену восстанавливает 1d6 HP", drawback: null, price: null, rarity: "standard" },
+  { id: "i_silovye_miofibry", name: "Силовые миофибры", slots: "1", effect: "+2 к силовым проверкам", drawback: null, price: null, rarity: "standard" },
+  { id: "i_legkie_filtry_mk_ii", name: "Лёгкие-фильтры Mk II", slots: "1", effect: "Преимущество против дыма, газа и загрязнения", drawback: null, price: null, rarity: "standard" },
+  { id: "i_audiofiltr", name: "Аудиофильтр", slots: "1", effect: "Игнорирует первую звуковую помеху сцены", drawback: null, price: null, rarity: "standard" },
+  { id: "i_pamyat_bufer", name: "Память-буфер", slots: "1", effect: "Хранит и воспроизводит запись сцены", drawback: null, price: null, rarity: "standard" },
+  { id: "i_kozhnyi_interfeis", name: "Кожный интерфейс", slots: "1", effect: "+2 к Электронике при физическом подключении", drawback: null, price: null, rarity: "standard" },
+  { id: "i_boevoi_opticheskii_paket", name: "Боевой оптический пакет", slots: "1", effect: "+1 к Стрельбе; игнорирует слабую дымовую помеху", drawback: null, price: null, rarity: "improved" },
+  { id: "i_pamyat_prizrak", name: "Память-призрак", slots: "1", effect: "+2 к Анализу и сохраняет запись одной сцены", drawback: null, price: null, rarity: "improved" },
+  { id: "i_usilennyi_neiroport", name: "Усиленный нейропорт", slots: "1", effect: "+1 RAM", drawback: null, price: null, rarity: "improved" },
+  { id: "i_reflektornaya_set", name: "Рефлекторная сеть", slots: "2", effect: "Раз за сцену дополнительное малое действие", drawback: null, price: null, rarity: "improved" },
+  { id: "i_hirurgicheskii_interfeis", name: "Хирургический интерфейс", slots: "1", effect: "+2 к Медицине при лечении и установке имплантов", drawback: null, price: null, rarity: "improved" },
+  { id: "i_myshechnyi_usilitel", name: "Мышечный усилитель", slots: "2", effect: "+1 урон ближнего боя и +2 к Атлетике", drawback: null, price: null, rarity: "improved" },
+  { id: "i_kibersluh_eho", name: "Киберслух «Эхо»", slots: "1", effect: "+2 к Внимательности по звуку; слышит через тонкие стены", drawback: null, price: null, rarity: "improved" },
+  { id: "i_dron_sinaps", name: "Дрон-синапс", slots: "1", effect: "+2 к одной проверке Дронов раз за сцену", drawback: null, price: null, rarity: "improved" },
+  { id: "i_termooptika", name: "Термооптика", slots: "1", effect: "Видит тепловые следы и скрытые источники тепла", drawback: null, price: null, rarity: "improved" },
+  { id: "i_nanofiltr_krovi", name: "Нанофильтр крови", slots: "1", effect: "Раз за сцену игнорирует яд, наркотик или лёгкий токсин", drawback: null, price: null, rarity: "improved" },
+  { id: "i_uskoritel_sdvig", name: "Ускоритель «Сдвиг»", slots: "2", effect: "Раз за сцену дополнительное действие", drawback: null, price: "Перегрет и STRESS -1d4", rarity: "exotic" },
+  { id: "i_hameleonovaya_kozha", name: "Хамелеоновая кожа", slots: "2", effect: "Преимущество на одну Скрытность за сцену", drawback: null, price: "Камеры могут распознать аномалию", rarity: "exotic" },
+  { id: "i_chernyi_neiroport", name: "Чёрный нейропорт", slots: "2", effect: "+2 RAM и доступ к чёрным хакам", drawback: null, price: "Уязвимость к нейрошоку", rarity: "exotic" },
+  { id: "i_prizrak_v_obolochke", name: "«Призрак в оболочке»", slots: "3", effect: "+1 RAM и +2 к лимиту имплантов", drawback: null, price: "Риск срыва при критическом сбое", rarity: "cult" },
+  { id: "i_hromirovannoe_chudovische", name: "«Хромированное чудовище»", slots: "3", effect: "Игнорирует требования тяжёлой брони и оружия", drawback: null, price: "Снижение скрытности, эмпатии или стабильности", rarity: "cult" },
+  { id: "i_svyatoi_razgon", name: "«Святой разгон»", slots: "3", effect: "Раз за сцену применяет хак или имплант без цены ресурса", drawback: null, price: "STRESS -1d6 и Перегрет", rarity: "cult" },
 ];
 
 const KIT_LABELS = {
@@ -315,6 +416,8 @@ let upgradeChar = null;
 let inventoryModal = null;
 let invCurrentTab = 'weapons';
 let invCharIdx = -1;
+let invRarityFilter = 'all';
+let invSearchQuery = '';
 
 // ======= STORAGE =======
 function saveToStorage() {
@@ -654,7 +757,10 @@ function calcDerivedFromChar(c) {
   const ab = c.abilities;
   const hp     = 10 + ab.STR + ab.WIL;
   const stress = 10 + ab.WIL + ab.INT;
-  const def    = 10 + AB_MOD[ab.DEX];
+  const equippedArmorId = (c.inventory?.armor || [])[0];
+  const equippedArmor = equippedArmorId ? ARMORS.find(a => a.id === equippedArmorId) : null;
+  const armorBonus = equippedArmor ? (parseInt(equippedArmor.def) || 0) : 0;
+  const def    = 10 + AB_MOD[ab.DEX] + armorBonus;
   const impl   = ab.WIL + 1;
   let maxRam   = 0;
   (c.devskills||[]).forEach(ds => {
@@ -662,7 +768,7 @@ function calcDerivedFromChar(c) {
     if (ds.name === 'Расширенная RAM') maxRam += 1;
     if (ds.name === 'Нейропорт')       maxRam += 1;
   });
-  return { hp, stress, def, impl, maxRam };
+  return { hp, stress, def, impl, maxRam, armorBonus };
 }
 
 // ======= CHARACTER SHEET =======
@@ -726,6 +832,13 @@ function renderCharSheet(c) {
     <div class="sheet-section">
       <h3>Скиллы развития</h3>
       ${(c.devskills||[]).length ? (c.devskills||[]).map(ds=>`<div class="devskill-card selected compact"><div class="devskill-header"><span class="devskill-name">${ds.name}</span><span class="devskill-class">${ds.class}</span></div><div class="devskill-desc">${ds.desc}</div><div class="devskill-meta">${ds.tier || 'Базовый'} · ${ds.dpCost} DP${ds.prereq ? ' · Требует: ' + ds.prereq : ''}</div></div>`).join('') : '<em>нет скилов</em>'}
+    </div>
+    <div class="sheet-section">
+      <h3>🎒 Инвентарь</h3>
+      ${renderInventorySection(c)}
+      <div class="nav-buttons" style="margin-top:0.6rem">
+        <button class="btn-upgrade" onclick="openInventory(${currentCharIndex})">🎒 Открыть инвентарь</button>
+      </div>
     </div>
     ${(c.upgrades&&c.upgrades.length) ? `<div class="sheet-section"><h3>История прокачки</h3><div class="upgrades-log">${c.upgrades.map(u=>`<div class="upgrade-log-entry">${u}</div>`).join('')}</div></div>` : ''}
     <div class="nav-buttons">
@@ -904,6 +1017,9 @@ function openInventory(charIdx) {
   modal.id = 'inventory-modal';
   modal.className = 'modal-overlay';
   modal.onclick = e => { if (e.target === modal) closeInventoryModal(); };
+  const rarityChips = RARITY_ORDER.map(r =>
+    `<button class="inv-filter-chip" onclick="setInvRarityFilter('${r}', this)">${RARITY_LABELS[r]}</button>`
+  ).join('');
   modal.innerHTML = `
     <div class="modal-box" role="dialog" aria-modal="true" aria-label="Инвентарь персонажа">
       <div class="modal-header"><span class="modal-title">🎒 Инвентарь</span><button class="modal-close" onclick="closeInventoryModal()">✕</button></div>
@@ -913,11 +1029,18 @@ function openInventory(charIdx) {
           <button class="upgrade-tab" onclick="switchInventoryTab('implants', this)">Импланты</button>
           <button class="upgrade-tab" onclick="switchInventoryTab('armor', this)">Броня</button>
         </div>
+        <input type="text" id="inv-search" class="inv-search-input" placeholder="🔍 Поиск по названию..." oninput="filterInventorySearch(this.value)" />
+        <div class="inv-filter-row">
+          <button class="inv-filter-chip active" onclick="setInvRarityFilter('all', this)">Все</button>
+          ${rarityChips}
+        </div>
         <div id="inventory-content"></div>
       </div>
     </div>`;
   document.body.appendChild(modal);
   invCurrentTab = 'weapons';
+  invRarityFilter = 'all';
+  invSearchQuery = '';
   renderInventoryTab();
 }
 
@@ -929,27 +1052,77 @@ function closeInventoryModal() {
 
 function switchInventoryTab(tab, btn) {
   invCurrentTab = tab;
+  invRarityFilter = 'all';
+  invSearchQuery = '';
+  const search = document.getElementById('inv-search');
+  if (search) search.value = '';
   document.querySelectorAll('#inventory-modal .upgrade-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.querySelectorAll('#inventory-modal .inv-filter-chip').forEach((b, i) => b.classList.toggle('active', i === 0));
   renderInventoryTab();
+}
+
+function setInvRarityFilter(r, btn) {
+  invRarityFilter = r;
+  document.querySelectorAll('#inventory-modal .inv-filter-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderInventoryTab();
+}
+
+function filterInventorySearch(value) {
+  invSearchQuery = value;
+  renderInventoryTab();
+}
+
+function renderInventoryItemCard(item, active) {
+  let meta = '', desc = '';
+  if (invCurrentTab === 'weapons') {
+    meta = item.type;
+    desc = `Урон: ${item.damage}` + (item.range ? ` · Дистанция: ${item.range}` : '') + ` — ${item.property}` + (item.price ? ` · Цена: ${item.price}` : '');
+  } else if (invCurrentTab === 'armor') {
+    meta = `${item.class} · DEF ${item.def}`;
+    desc = item.property + (item.price ? ` · Цена: ${item.price}` : '');
+  } else {
+    meta = `Слоты: ${item.slots}`;
+    desc = item.effect + (item.drawback ? ` · Недостаток: ${item.drawback}` : '') + (item.price ? ` · Цена: ${item.price}` : '');
+  }
+  return `<div class="devskill-card ${active?'selected':''}" onclick="toggleInventoryItem('${invCurrentTab}','${item.id}')">
+    <div class="devskill-header"><span class="devskill-name">${item.name}</span><span class="devskill-class">${meta}</span></div>
+    <div class="devskill-desc">${desc}</div>
+  </div>`;
 }
 
 function renderInventoryTab() {
   const c = savedChars[invCharIdx];
   if (!c) return;
   const map = { weapons: WEAPONS, implants: IMPLANTS, armor: ARMORS };
-  const list = map[invCurrentTab] || [];
+  let list = map[invCurrentTab] || [];
   const selected = c.inventory?.[invCurrentTab] || [];
-  const usedImplants = (c.inventory?.implants || []).reduce((acc, id) => acc + (IMPLANTS.find(x=>x.id===id)?.slots || 0), 0);
+  const usedImplants = (c.inventory?.implants || []).reduce((acc, id) => acc + (parseInt(IMPLANTS.find(x=>x.id===id)?.slots) || 0), 0);
   const implLimit = calcDerivedFromChar(c).impl;
+
+  if (invRarityFilter !== 'all') list = list.filter(it => it.rarity === invRarityFilter);
+  if (invSearchQuery.trim()) {
+    const q = invSearchQuery.trim().toLowerCase();
+    list = list.filter(it => it.name.toLowerCase().includes(q));
+  }
+
   let top = '';
   if (invCurrentTab === 'implants') top = `<div class="hint">Лимит имплантов: <strong>${usedImplants}/${implLimit}</strong></div>`;
-  document.getElementById('inventory-content').innerHTML = top + list.map(item => {
-    const active = selected.includes(item.id);
-    const meta = item.def ? `DEF +${item.def}` : (item.quality ? item.quality : (item.kind || 'предмет'));
-    const note = item.note || item.desc || item.source || '';
-    return `<div class="devskill-card ${active?'selected':''}" onclick="toggleInventoryItem('${invCurrentTab}','${item.id}')"><div class="devskill-header"><span class="devskill-name">${item.name}</span><span class="devskill-class">${meta}</span></div><div class="devskill-desc">${note}</div></div>`;
-  }).join('');
+
+  if (!list.length) {
+    document.getElementById('inventory-content').innerHTML = top + '<div class="empty-state">Ничего не найдено</div>';
+    return;
+  }
+
+  const grouped = RARITY_ORDER.map(r => ({ rarity: r, items: list.filter(it => it.rarity === r) })).filter(g => g.items.length);
+
+  document.getElementById('inventory-content').innerHTML = top + grouped.map(g => `
+    <div class="inv-rarity-group">
+      <div class="inv-rarity-heading rarity-${g.rarity}">${RARITY_LABELS[g.rarity]} <small>(${g.items.length})</small></div>
+      ${g.items.map(item => renderInventoryItemCard(item, selected.includes(item.id))).join('')}
+    </div>
+  `).join('');
 }
 
 function toggleInventoryItem(tab, itemId) {
@@ -961,8 +1134,8 @@ function toggleInventoryItem(tab, itemId) {
   else {
     if (tab === 'armor') c.inventory.armor = [itemId];
     else if (tab === 'implants') {
-      const nextCost = IMPLANTS.find(x=>x.id===itemId)?.slots || 0;
-      const used = c.inventory.implants.reduce((acc, id) => acc + (IMPLANTS.find(x=>x.id===id)?.slots || 0), 0);
+      const nextCost = parseInt(IMPLANTS.find(x=>x.id===itemId)?.slots) || 0;
+      const used = c.inventory.implants.reduce((acc, id) => acc + (parseInt(IMPLANTS.find(x=>x.id===id)?.slots) || 0), 0);
       const limit = calcDerivedFromChar(c).impl;
       if (used + nextCost > limit) { alert('Превышен лимит имплантов.'); return; }
       arr.push(itemId);
